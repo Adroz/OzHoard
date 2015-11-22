@@ -1,4 +1,4 @@
-package com.workshoporange.android.ozhoard.Deal;
+package com.workshoporange.android.ozhoard.dealTemp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
