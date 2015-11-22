@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.workshoporange.android.ozhoard.Deal.DealContent;
+import com.workshoporange.android.ozhoard.deal.DealContent;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
