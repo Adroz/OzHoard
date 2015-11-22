@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.workshoporange.android.ozhoard.dummy.DummyContent;
+import com.workshoporange.android.ozhoard.dummy.DealContent;
 
 /**
  * A fragment representing a single Deal detail screen.
@@ -27,7 +27,7 @@ public class DealDetailFragment extends Fragment {
     /**
      * The dummy content this fragment is presenting.
      */
-    private DummyContent.DummyItem mItem;
+    private DealContent.Deal mItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -44,12 +44,12 @@ public class DealDetailFragment extends Fragment {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            mItem = DealContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
 
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.content);
+                appBarLayout.setTitle(mItem.title);
             }
         }
     }

@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.workshoporange.android.ozhoard.dummy.DummyContent;
+import com.workshoporange.android.ozhoard.dummy.DealContent;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -49,7 +49,7 @@ public class DealListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
-    public SimpleItemRecyclerViewAdapter mDealsAdapter = new SimpleItemRecyclerViewAdapter(DummyContent.ITEMS);
+    public SimpleItemRecyclerViewAdapter mDealsAdapter = new SimpleItemRecyclerViewAdapter(DealContent.ITEMS);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,9 +91,9 @@ public class DealListActivity extends AppCompatActivity {
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-        private final List<DummyContent.DummyItem> mValues;
+        private final List<DealContent.Deal> mValues;
 
-        public SimpleItemRecyclerViewAdapter(List<DummyContent.DummyItem> items) {
+        public SimpleItemRecyclerViewAdapter(List<DealContent.Deal> items) {
             mValues = items;
         }
 
@@ -108,7 +108,7 @@ public class DealListActivity extends AppCompatActivity {
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
             holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
+            holder.mContentView.setText(mValues.get(position).details);
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -137,16 +137,16 @@ public class DealListActivity extends AppCompatActivity {
             return mValues.size();
         }
 
-        public void add(DummyContent.DummyItem item) {
+        public void add(DealContent.Deal item) {
             add(mValues.size(), item);
         }
 
-        public void add(int position, DummyContent.DummyItem item) {
+        public void add(int position, DealContent.Deal item) {
             mValues.add(position, item);
             notifyItemInserted(position);
         }
 
-        public void remove(DummyContent.DummyItem item) {
+        public void remove(DealContent.Deal item) {
             int position = mValues.indexOf(item);
             mValues.remove(position);
             notifyItemRemoved(position);
@@ -161,7 +161,7 @@ public class DealListActivity extends AppCompatActivity {
             public final View mView;
             public final TextView mIdView;
             public final TextView mContentView;
-            public DummyContent.DummyItem mItem;
+            public DealContent.Deal mItem;
 
             public ViewHolder(View view) {
                 super(view);
@@ -331,6 +331,7 @@ public class DealListActivity extends AppCompatActivity {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
+
             return null;
         }
 
@@ -340,7 +341,7 @@ public class DealListActivity extends AppCompatActivity {
                 mDealsAdapter.clear();
                 int id = 0;
                 for (String dealStr : result) {
-                    mDealsAdapter.add(new DummyContent.DummyItem(Integer.toString(id), dealStr, "Blah"));
+                    mDealsAdapter.add(new DealContent.Deal(Integer.toString(id), dealStr, "Blah", dealStr));
                     id++;
                 }
             }
