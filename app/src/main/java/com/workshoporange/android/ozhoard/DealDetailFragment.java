@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.workshoporange.android.ozhoard.dummy.DealContent;
+import com.workshoporange.android.ozhoard.Deal.DealContent;
 
 /**
  * A fragment representing a single Deal detail screen.

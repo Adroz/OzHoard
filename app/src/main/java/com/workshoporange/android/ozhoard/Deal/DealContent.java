@@ -1,4 +1,4 @@
-package com.workshoporange.android.ozhoard.dummy;
+package com.workshoporange.android.ozhoard.Deal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
