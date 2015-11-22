@@ -137,6 +137,26 @@ public class DealListActivity extends AppCompatActivity {
             return mValues.size();
         }
 
+        public void add(DummyContent.DummyItem item) {
+            add(mValues.size(), item);
+        }
+
+        public void add(int position, DummyContent.DummyItem item) {
+            mValues.add(position, item);
+            notifyItemInserted(position);
+        }
+
+        public void remove(DummyContent.DummyItem item) {
+            int position = mValues.indexOf(item);
+            mValues.remove(position);
+            notifyItemRemoved(position);
+        }
+
+        public void clear() {
+            mValues.clear();
+            notifyDataSetChanged();
+        }
+
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
             public final TextView mIdView;
@@ -165,12 +185,8 @@ public class DealListActivity extends AppCompatActivity {
         private final String LOG_TAG = FetchFeedTask.class.getSimpleName();
 
         /**
-         * TODO: fix me.
-         * Take the String representing the complete forecast in JSON Format and
+         * Take the String representing the complete deal list in XML Format and
          * pull out the data we need to construct the Strings needed for the wireframes.
-         * <p/>
-         * Fortunately parsing is easy:  constructor takes the JSON string and converts it
-         * into an Object hierarchy for us.
          */
         private String[] getDealsDataFromRss(String feedXmlStr, int numDeals)
                 throws XmlPullParserException, IOException {
@@ -271,7 +287,7 @@ public class DealListActivity extends AppCompatActivity {
 
                 // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 if (inputStream == null) {
                     // Nothing to do.
                     return null;
@@ -320,13 +336,14 @@ public class DealListActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String[] result) {
-//            if (result != null) {
-//                mDealsAdapter.clear();
-//                for (String dayForecastStr : result) {
-//                    mDealsAdapter.add(dayForecastStr);
-//                }
-//                // New data is back from the server.  Hooray!
-//            }
+            if (result != null) {
+                mDealsAdapter.clear();
+                int id = 0;
+                for (String dealStr : result) {
+                    mDealsAdapter.add(new DummyContent.DummyItem(Integer.toString(id), dealStr, "Blah"));
+                    id++;
+                }
+            }
         }
     }
 }
