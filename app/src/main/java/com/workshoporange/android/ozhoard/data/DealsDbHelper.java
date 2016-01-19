@@ -23,12 +23,17 @@ public class DealsDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        final String SQL_CREATE_CATEGORY_TABLE = "CREATE TABLE " + CategoryEntry.TABLE_NAME +
+                " (" + CategoryEntry._ID + " INTEGER PRIMARY KEY ," +
+                CategoryEntry.COLUMN_LABEL + " TEXT NOT NULL, " +
+                CategoryEntry.COLUMN_PATH + " TEXT NOT NULL" +
+                ");";
+
         final String SQL_CREATE_DEALS_TABLE = "CREATE TABLE " + DealEntry.TABLE_NAME + " (" +
 
                 DealEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-
                 // the ID of the category entry associated with this deal data
-                DealEntry.COLUMN_CAT_KEY + " INTEGER NOT NULL, " +
+                DealEntry.COLUMN_CAT_KEY + " TEXT UNIQUE NOT NULL, " +
                 DealEntry.COLUMN_DATE + " INTEGER NOT NULL, " +
                 DealEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
                 DealEntry.COLUMN_LINK + " TEXT NOT NULL, " +
@@ -39,6 +44,11 @@ public class DealsDbHelper extends SQLiteOpenHelper {
                 " FOREIGN KEY (" + DealEntry.COLUMN_CAT_KEY + ") REFERENCES " +
                 CategoryEntry.TABLE_NAME + " (" + CategoryEntry._ID + "));";
 
+        // On same time stamp and category, replace.
+//                " UNIQUE (" + DealEntry.COLUMN_DATE + ", " +
+//                DealEntry.COLUMN_CAT_KEY + ") ON CONFLICT REPLACE);";
+
+        sqLiteDatabase.execSQL(SQL_CREATE_CATEGORY_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_DEALS_TABLE);
     }
 
