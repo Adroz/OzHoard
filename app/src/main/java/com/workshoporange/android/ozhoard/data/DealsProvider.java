@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.util.Log;
 
 import com.workshoporange.android.ozhoard.data.DealsContract.CategoryEntry;
 
@@ -288,7 +287,6 @@ public class DealsProvider extends ContentProvider {
                 try {
                     for (ContentValues value : values) {
                         normalizeDate(value);
-                        Log.d("TAG", value.toString());
                         long _id = db.insert(DealEntry.TABLE_NAME, null, value);
                         if (_id != -1) {
                             returnCount++;

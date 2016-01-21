@@ -225,17 +225,16 @@ public class DealListActivity extends AppCompatActivity {
                     if (xpp.getName().equalsIgnoreCase(RSS_ITEM)) {
                         insideItem = true;
                     } else if (xpp.getName().equalsIgnoreCase(RSS_TITLE)) {
-                        if (insideItem) headlines.add(xpp.nextText());      // Extract the headline
+                        if (insideItem) headlines.add(xpp.nextText());  // Extract the headline
                     } else if (xpp.getName().equalsIgnoreCase(RSS_LINK)) {
                         if (insideItem)
-                            links.add(xpp.nextText());          // Extract the deal's link
+                            links.add(xpp.nextText());                  // Extract the deal's link
                     } else if (xpp.getName().equalsIgnoreCase(OB_DATE)) {
                         if (insideItem)
-                            dates.add(xpp.nextText());          // Extract the posting date
+                            dates.add(xpp.nextText());                  // Extract the posting date
                     } else if (xpp.getName().equalsIgnoreCase(OB_AUTHOR)) {
-                        if (insideItem) authors.add(xpp.nextText());        // Extract the author
+                        if (insideItem) authors.add(xpp.nextText());    // Extract the author
                     }
-//                Log.d(LOG_TAG, xpp.getName());
                 } else if (eventType == XmlPullParser.END_TAG
                         && xpp.getName().equalsIgnoreCase(RSS_ITEM)) {
                     insideItem = false;

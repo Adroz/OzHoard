@@ -44,7 +44,7 @@ public class DealsDbHelper extends SQLiteOpenHelper {
                 " FOREIGN KEY (" + DealEntry.COLUMN_CAT_KEY + ") REFERENCES " +
                 CategoryEntry.TABLE_NAME + " (" + CategoryEntry._ID + ")" +
 
-        // On same time stamp and category, replace.
+                // On same time stamp and category, replace.
                 " UNIQUE (" + DealEntry.COLUMN_DATE + ", " +
                 DealEntry.COLUMN_CAT_KEY + ") ON CONFLICT REPLACE);";
 

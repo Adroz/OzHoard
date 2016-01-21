@@ -101,31 +101,31 @@ public class TestProvider extends AndroidTestCase {
     }
 
     public void testGetType() {
-        // content://com.example.android.sunshine.app/weather/
+        // content://com.example.android.sunshine/weather/
         String type = mContext.getContentResolver().getType(DealEntry.CONTENT_URI);
         // vnd.android.cursor.dir/com.example.android.sunshine.app/weather
         assertEquals("Error: the DealEntry CONTENT_URI should return DealEntry.CONTENT_TYPE",
                 DealEntry.CONTENT_TYPE, type);
 
         String testCategory = "internet";
-        // content://com.workshoporange.android.ozhoard.app/category/internet
+        // content://com.workshoporange.android.ozhoard/category/internet
         type = mContext.getContentResolver().getType(
                 DealEntry.buildDealCategory(testCategory));
-        // vnd.android.cursor.dir/com.workshoporange.android.ozhoard.app/deals
+        // vnd.android.cursor.dir/com.workshoporange.android.ozhoard/deals
         assertEquals("Error: the DealEntry CONTENT_URI with location should return " +
                 "DealEntry.CONTENT_TYPE", DealEntry.CONTENT_TYPE, type);
 
         long testDate = 1419120000L; // December 21st, 2014
-        // content://com.example.android.sunshine.app/weather/94074/20140612
+        // content://com.workshoporange.android.ozhoard/deals/internet/20140612
         type = mContext.getContentResolver().getType(
                 DealEntry.buildDealCategoryWithDate(testCategory, testDate));
-        // vnd.android.cursor.item/com.workshoporange.android.ozhoard.app/deals/1419120000
+        // vnd.android.cursor.item/com.workshoporange.android.ozhoard/deals/1419120000
         assertEquals("Error: the DealEntry CONTENT_URI with category and date should return " +
                 "DealEntry.CONTENT_ITEM_TYPE", DealEntry.CONTENT_ITEM_TYPE, type);
 
-        // content://com.workshoporange.android.ozhoard.app/category/
+        // content://com.workshoporange.android.ozhoard/category/
         type = mContext.getContentResolver().getType(CategoryEntry.CONTENT_URI);
-        // vnd.android.cursor.dir/com.workshoporange.android.ozhoard.app/category
+        // vnd.android.cursor.dir/com.workshoporange.android.ozhoard/category
         assertEquals("Error: the CategoryEntry CONTENT_URI should return CategoryEntry.CONTENT_TYPE",
                 CategoryEntry.CONTENT_TYPE, type);
     }
@@ -213,11 +213,6 @@ public class TestProvider extends AndroidTestCase {
         assertEquals(count, 1);
 
         // Test to make sure the observer is called.  If not, throw an assertion.
-        //
-        //
-        //
-        // If the code is failing here, it means that your content provider
-        // isn't calling getContext().getContentResolver().notifyChange(uri, null);
         tco.waitForNotificationOrFail();
 
         categoryCursor.unregisterContentObserver(tco);
@@ -247,8 +242,6 @@ public class TestProvider extends AndroidTestCase {
         Uri locationUri = mContext.getContentResolver().insert(CategoryEntry.CONTENT_URI, testValues);
 
         // Did the ContentObserver get called?
-        //
-        //              If this fails, the insert category isn't calling getContext().getContentResolver().notifyChange(uri, null);
         tco.waitForNotificationOrFail();
         mContext.getContentResolver().unregisterContentObserver(tco);
 
@@ -273,9 +266,6 @@ public class TestProvider extends AndroidTestCase {
                 .insert(DealEntry.CONTENT_URI, dealValues);
         assertTrue(weatherInsertUri != null);
 
-        // Did the content observer get called?
-        //
-        // Students:  If this fails, your insert deal in your ContentProvider isn't calling getContext().getContentResolver().notifyChange(uri, null);
         tco.waitForNotificationOrFail();
         mContext.getContentResolver().unregisterContentObserver(tco);
 
@@ -328,17 +318,12 @@ public class TestProvider extends AndroidTestCase {
 
         deleteAllRecordsFromProvider();
 
-        //
-        //
-        // If either of these fail, most-likely not calling the getContext().getContentResolver().notifyChange(uri, null); in the ContentProvider
-        // delete.  (only if the insertReadProvider is succeeding)
         categoryObserver.waitForNotificationOrFail();
         dealsObserver.waitForNotificationOrFail();
 
         mContext.getContentResolver().unregisterContentObserver(categoryObserver);
         mContext.getContentResolver().unregisterContentObserver(dealsObserver);
     }
-
 
     static private final int BULK_INSERT_RECORDS_TO_INSERT = 10;
 
@@ -384,11 +369,6 @@ public class TestProvider extends AndroidTestCase {
 
         int insertCount = mContext.getContentResolver().bulkInsert(DealEntry.CONTENT_URI, bulkInsertContentValues);
 
-        //
-        //
-        //
-        // If this fails, it means that you most-likely are not calling the getContext().getContentResolver().notifyChange(uri, null); in your BulkInsert
-        // ContentProvider method.
         dealObserver.waitForNotificationOrFail();
         mContext.getContentResolver().unregisterContentObserver(dealObserver);
 
