@@ -40,7 +40,7 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
     private boolean DEBUG = true;
 
     /**
-     * Helper method to handle insertion of a new category in the weather database.
+     * Helper method to handle insertion of a new category in the deal database.
      *
      * @param categoryPath  The category path string used to request updates from the server.
      * @param categoryTitle A human-readable category title, e.g "Gaming"
@@ -57,8 +57,8 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                 null);
 
         if (categoryCursor.moveToFirst()) {
-            int locationIdIndex = categoryCursor.getColumnIndex(CategoryEntry._ID);
-            categoryId = categoryCursor.getLong(locationIdIndex);
+            int categoryIdIndex = categoryCursor.getColumnIndex(CategoryEntry._ID);
+            categoryId = categoryCursor.getLong(categoryIdIndex);
         } else { // Else insert into database
             ContentValues values = new ContentValues();
             values.put(CategoryEntry.COLUMN_CATEGORY_TITLE, categoryTitle);
@@ -177,7 +177,7 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
 
-        // Will contain the raw JSON response as a string.
+        // Will contain the raw XML response as a string.
         String feedXmlStr = null;
 
         try {
@@ -221,10 +221,14 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                 return null;
             }
             feedXmlStr = buffer.toString();
+            getDealsDataFromRss(feedXmlStr, params[0]);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the deal data, there's no point in attempting
             // to parse it.
+            return null;
+        } catch (XmlPullParserException e) {
+            Log.e(LOG_TAG, "Error ", e);
             return null;
         } finally {
             if (urlConnection != null) {
@@ -238,14 +242,6 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                 }
             }
         }
-
-        try {
-            getDealsDataFromRss(feedXmlStr, params[0]);
-        } catch (XmlPullParserException | IOException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
-        }
-
         return null;
     }
 }
