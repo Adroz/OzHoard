@@ -40,11 +40,11 @@ public class TestUtilities extends AndroidTestCase {
     }
 
     /**
-     * Create some default weather values for database tests.
+     * Create some default deal values for database tests.
      */
-    static ContentValues createDealValues(long locationRowId) {
+    static ContentValues createDealValues(long categoryRowId) {
         ContentValues dealValues = new ContentValues();
-        dealValues.put(DealsContract.DealEntry.COLUMN_CAT_KEY, locationRowId);
+        dealValues.put(DealsContract.DealEntry.COLUMN_CAT_KEY, categoryRowId);
         dealValues.put(DealsContract.DealEntry.COLUMN_DATE, TEST_DATE);
         dealValues.put(DealsContract.DealEntry.COLUMN_TITLE, "Deals, deals, deals!");
         dealValues.put(DealsContract.DealEntry.COLUMN_LINK, "www.deals.com");
@@ -69,13 +69,13 @@ public class TestUtilities extends AndroidTestCase {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues testValues = TestUtilities.createGamingCategoryValues();
 
-        long locationRowId;
-        locationRowId = db.insert(DealsContract.CategoryEntry.TABLE_NAME, null, testValues);
+        long categoryRowId;
+        categoryRowId = db.insert(DealsContract.CategoryEntry.TABLE_NAME, null, testValues);
 
         // Verify we got a row back.
-        assertTrue("Error: Failure to insert Gaming Category Values", locationRowId != -1);
+        assertTrue("Error: Failure to insert Gaming Category Values", categoryRowId != -1);
 
-        return locationRowId;
+        return categoryRowId;
     }
 
     /**

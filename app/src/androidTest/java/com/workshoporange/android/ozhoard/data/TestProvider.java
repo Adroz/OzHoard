@@ -101,9 +101,9 @@ public class TestProvider extends AndroidTestCase {
     }
 
     public void testGetType() {
-        // content://com.example.android.sunshine/weather/
+        // content://com.workshoporange.android.ozhoard/deals/
         String type = mContext.getContentResolver().getType(DealEntry.CONTENT_URI);
-        // vnd.android.cursor.dir/com.example.android.sunshine.app/weather
+        // vnd.android.cursor.dir/com.workshoporange.android.ozhoard/deals
         assertEquals("Error: the DealEntry CONTENT_URI should return DealEntry.CONTENT_TYPE",
                 DealEntry.CONTENT_TYPE, type);
 
@@ -111,8 +111,8 @@ public class TestProvider extends AndroidTestCase {
         // content://com.workshoporange.android.ozhoard/category/internet
         type = mContext.getContentResolver().getType(
                 DealEntry.buildDealCategory(testCategory));
-        // vnd.android.cursor.dir/com.workshoporange.android.ozhoard/deals
-        assertEquals("Error: the DealEntry CONTENT_URI with location should return " +
+        // vnd.android.cursor.dir/
+        assertEquals("Error: the DealEntry CONTENT_URI with category should return " +
                 "DealEntry.CONTENT_TYPE", DealEntry.CONTENT_TYPE, type);
 
         long testDate = 1419120000L; // December 21st, 2014
@@ -174,7 +174,7 @@ public class TestProvider extends AndroidTestCase {
         );
 
         // Make sure we get the correct cursor out of the database
-        TestUtilities.validateCursor("testBasicCategoryQueries, location query", categoryCursor, testValues);
+        TestUtilities.validateCursor("testBasicCategoryQueries, category query", categoryCursor, testValues);
 
         // Has the NotificationUri been set correctly? --- can only test this easily against API
         // level 19 or greater because getNotificationUri was added in API level 19.
@@ -239,14 +239,14 @@ public class TestProvider extends AndroidTestCase {
         // Register a content observer for the insert. This time, directly with the content resolver.
         TestUtilities.TestContentObserver tco = TestUtilities.getTestContentObserver();
         mContext.getContentResolver().registerContentObserver(CategoryEntry.CONTENT_URI, true, tco);
-        Uri locationUri = mContext.getContentResolver().insert(CategoryEntry.CONTENT_URI, testValues);
+        Uri categoryUri = mContext.getContentResolver().insert(CategoryEntry.CONTENT_URI, testValues);
 
         // Did the ContentObserver get called?
         tco.waitForNotificationOrFail();
         mContext.getContentResolver().unregisterContentObserver(tco);
 
         // Parse row and verify valid.
-        long categoryRowId = ContentUris.parseId(locationUri);
+        long categoryRowId = ContentUris.parseId(categoryUri);
         assertTrue(categoryRowId != -1);
 
         // Data's inserted in theory. Now check that it made it and verify it made the round trip.
@@ -262,38 +262,38 @@ public class TestProvider extends AndroidTestCase {
 
         mContext.getContentResolver().registerContentObserver(DealEntry.CONTENT_URI, true, tco);
 
-        Uri weatherInsertUri = mContext.getContentResolver()
+        Uri dealInsertUri = mContext.getContentResolver()
                 .insert(DealEntry.CONTENT_URI, dealValues);
-        assertTrue(weatherInsertUri != null);
+        assertTrue(dealInsertUri != null);
 
         tco.waitForNotificationOrFail();
         mContext.getContentResolver().unregisterContentObserver(tco);
 
-        Cursor weatherCursor = mContext.getContentResolver().query(
+        Cursor dealsCursor = mContext.getContentResolver().query(
                 DealEntry.CONTENT_URI, null, null, null, null);
 
         TestUtilities.validateCursor("testInsertReadProvider. Error validating DealEntry insert.",
-                weatherCursor, dealValues);
+                dealsCursor, dealValues);
 
         // Add the category values in with the deal data so that it can be ensured that the join
         // worked and all the values are returned.
         dealValues.putAll(testValues);
 
         // Get the joined Deals and Category data
-        weatherCursor = mContext.getContentResolver().query(
+        dealsCursor = mContext.getContentResolver().query(
                 DealEntry.buildDealCategory(TestUtilities.TEST_CATEGORY), null, null, null, null);
         TestUtilities.validateCursor("testInsertReadProvider.  Error validating joined Deals and " +
-                "Category Data.", weatherCursor, dealValues);
+                "Category Data.", dealsCursor, dealValues);
 
         // Get the joined Deals and Category data with a start date
-        weatherCursor = mContext.getContentResolver().query(
+        dealsCursor = mContext.getContentResolver().query(
                 DealEntry.buildDealCategoryWithStartDate(
                         TestUtilities.TEST_CATEGORY, TestUtilities.TEST_DATE), null, null, null, null);
         TestUtilities.validateCursor("testInsertReadProvider.  Error validating joined Deals and " +
-                "Category Data with start date.", weatherCursor, dealValues);
+                "Category Data with start date.", dealsCursor, dealValues);
 
         // Get the joined Weather data for a specific date
-        weatherCursor = mContext.getContentResolver().query(
+        dealsCursor = mContext.getContentResolver().query(
                 DealEntry.buildDealCategoryWithDate(TestUtilities.TEST_CATEGORY, TestUtilities.TEST_DATE),
                 null,
                 null,
@@ -301,7 +301,7 @@ public class TestProvider extends AndroidTestCase {
                 null
         );
         TestUtilities.validateCursor("testInsertReadProvider. Error validating joined Deals and " +
-                "Category data for a specific date.", weatherCursor, dealValues);
+                "Category data for a specific date.", dealsCursor, dealValues);
     }
 
     // Make sure records can still be deleted after adding/updating stuff.
@@ -346,7 +346,7 @@ public class TestProvider extends AndroidTestCase {
     }
 
     public void testBulkInsert() {
-        // Create a location value, verify that it's returned
+        // Create a category value, verify that it's returned
         ContentValues testValues = TestUtilities.createGamingCategoryValues();
         Uri categoryUri = mContext.getContentResolver().insert(CategoryEntry.CONTENT_URI, testValues);
         long categoryRowId = ContentUris.parseId(categoryUri);
@@ -378,7 +378,8 @@ public class TestProvider extends AndroidTestCase {
                 DealEntry.CONTENT_URI,
                 null,
                 null,
-                null, DealEntry.COLUMN_DATE + " ASC"  // sort order == by DATE ASCENDING
+                null,
+                DealEntry.COLUMN_DATE + " ASC"  // sort order == by DATE ASCENDING
         );
 
         // Should have as many records as we inserted

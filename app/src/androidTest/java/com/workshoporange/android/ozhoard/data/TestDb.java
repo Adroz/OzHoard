@@ -71,7 +71,7 @@ public class TestDb extends AndroidTestCase {
 
         // If this fails, it means that your database doesn't contain both the category entry
         // and deal entry tables.
-        assertTrue("Error: Your database was created without both the location entry and weather entry tables",
+        assertTrue("Error: Your database was created without both the category entry and deals entry tables",
                 tableNameHashSet.isEmpty());
 
         // Do the tables contain the correct columns?

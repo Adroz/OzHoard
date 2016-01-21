@@ -25,8 +25,8 @@ public class DealsDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         final String SQL_CREATE_CATEGORY_TABLE = "CREATE TABLE " + CategoryEntry.TABLE_NAME +
                 " (" + CategoryEntry._ID + " INTEGER PRIMARY KEY ," +
-                CategoryEntry.COLUMN_CATEGORY_TITLE + " TEXT NOT NULL, " +
-                CategoryEntry.COLUMN_CATEGORY_PATH + " TEXT UNIQUE NOT NULL" +
+                CategoryEntry.COLUMN_CATEGORY_PATH + " TEXT UNIQUE NOT NULL, " +
+                CategoryEntry.COLUMN_CATEGORY_TITLE + " TEXT NOT NULL" +
                 ");";
 
         final String SQL_CREATE_DEALS_TABLE = "CREATE TABLE " + DealEntry.TABLE_NAME + " (" +

@@ -61,7 +61,7 @@ public class DealsProvider extends ContentProvider {
                     DealEntry.COLUMN_DATE + " = ? ";
 
     private Cursor getDealsByCategoryPath(Uri uri, String[] projection, String sortOrder) {
-        String locationSetting = DealEntry.getCategoryPathFromUri(uri);
+        String categoryPath = DealEntry.getCategoryPathFromUri(uri);
         long startDate = DealEntry.getStartDateFromUri(uri);
 
         String[] selectionArgs;
@@ -69,9 +69,9 @@ public class DealsProvider extends ContentProvider {
 
         if (startDate == 0) {
             selection = sCategoryPathSelection;
-            selectionArgs = new String[]{locationSetting};
+            selectionArgs = new String[]{categoryPath};
         } else {
-            selectionArgs = new String[]{locationSetting, Long.toString(startDate)};
+            selectionArgs = new String[]{categoryPath, Long.toString(startDate)};
             selection = sCategoryPathWithStartDateSelection;
         }
 
@@ -85,21 +85,20 @@ public class DealsProvider extends ContentProvider {
         );
     }
 
-    private Cursor getWeatherByLocationSettingAndDate(
+    private Cursor getDealsByCategoryPathAndDate(
             Uri uri, String[] projection, String sortOrder) {
-        String locationSetting = DealEntry.getCategoryPathFromUri(uri);
+        String categoryPath = DealEntry.getCategoryPathFromUri(uri);
         long date = DealEntry.getDateFromUri(uri);
 
         return sDealsByCategoryIdQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
                 sCategoryPathAndDaySelection,
-                new String[]{locationSetting, Long.toString(date)},
+                new String[]{categoryPath, Long.toString(date)},
                 null,
                 null,
                 sortOrder
         );
     }
-
 
     static UriMatcher buildUriMatcher() {
         final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -112,7 +111,6 @@ public class DealsProvider extends ContentProvider {
 
         return sURIMatcher;
     }
-
 
     @Override
     public boolean onCreate() {
@@ -146,15 +144,15 @@ public class DealsProvider extends ContentProvider {
         // and query the database accordingly.
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
-            // "weather/*/*"
+            // "deals/*/*"
             case DEALS_WITH_CATEGORY_AND_DATE:
-                retCursor = getWeatherByLocationSettingAndDate(uri, projection, sortOrder);
+                retCursor = getDealsByCategoryPathAndDate(uri, projection, sortOrder);
                 break;
-            // "weather/*"
+            // "deals/*"
             case DEALS_WITH_CATEGORY:
                 retCursor = getDealsByCategoryPath(uri, projection, sortOrder);
                 break;
-            // "weather"
+            // "deals"
             case DEALS:
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         DealEntry.TABLE_NAME,
@@ -166,7 +164,7 @@ public class DealsProvider extends ContentProvider {
                         sortOrder
                 );
                 break;
-            // "location"
+            // "category"
             case CATEGORY:
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         CategoryEntry.TABLE_NAME,

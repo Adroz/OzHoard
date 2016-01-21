@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
 import android.text.format.Time;
 
 /**
- * Defines table and column names for the weather database.
+ * Defines table and column names for the deals database.
  */
 public class DealsContract {
 
@@ -73,15 +73,14 @@ public class DealsContract {
             return CONTENT_URI.buildUpon().appendPath(categoryPath).build();
         }
 
-        public static Uri buildDealCategoryWithStartDate(
-                String locationSetting, long startDate) {
+        public static Uri buildDealCategoryWithStartDate(String categoryPath, long startDate) {
             long normalizedDate = normalizeDate(startDate);
-            return CONTENT_URI.buildUpon().appendPath(locationSetting)
+            return CONTENT_URI.buildUpon().appendPath(categoryPath)
                     .appendQueryParameter(COLUMN_DATE, Long.toString(normalizedDate)).build();
         }
 
-        public static Uri buildDealCategoryWithDate(String locationSetting, long date) {
-            return CONTENT_URI.buildUpon().appendPath(locationSetting)
+        public static Uri buildDealCategoryWithDate(String categoryPath, long date) {
+            return CONTENT_URI.buildUpon().appendPath(categoryPath)
                     .appendPath(Long.toString(normalizeDate(date))).build();
         }
 

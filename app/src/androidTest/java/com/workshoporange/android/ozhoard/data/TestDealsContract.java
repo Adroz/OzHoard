@@ -10,14 +10,14 @@ public class TestDealsContract extends AndroidTestCase {
     private static final long TEST_DEAL_DATE = 1419033600L;  // December 20th, 2014
 
     public void testBuildWeatherLocation() {
-        Uri locationUri = DealsContract.DealEntry.buildDealCategory(TEST_DEAL_CATEGORY);
+        Uri categoryUri = DealsContract.DealEntry.buildDealCategory(TEST_DEAL_CATEGORY);
         assertNotNull("Error: Null Uri returned. You must fill-in buildDealCategory in " +
                         "DealsContract.",
-                locationUri);
-        assertEquals("Error: Weather location not properly appended to the end of the Uri",
-                TEST_DEAL_CATEGORY, locationUri.getLastPathSegment());
-        assertEquals("Error: Weather location Uri doesn't match our expected result",
-                locationUri.toString(),
+                categoryUri);
+        assertEquals("Error: Deal category not properly appended to the end of the Uri",
+                TEST_DEAL_CATEGORY, categoryUri.getLastPathSegment());
+        assertEquals("Error: Deal category Uri doesn't match our expected result",
+                categoryUri.toString(),
                 "content://com.workshoporange.android.ozhoard/deals/%2FToys");
     }
 }
