@@ -29,6 +29,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.workshoporange.android.ozhoard.DealListActivity" />
         </activity>
+
+        <provider
+            android:name=".data.DealsProvider"
+            android:authorities="com.workshoporange.android.ozhoard"
+            android:exported="false" />
     </application>
 
 </manifest>

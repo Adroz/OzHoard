@@ -1,21 +1,54 @@
 package com.workshoporange.android.ozhoard.data;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.net.Uri;
 import android.provider.BaseColumns;
+import android.text.format.Time;
 
 /**
  * Defines table and column names for the weather database.
  */
 public class DealsContract {
+
+    public static final String CONTENT_AUTHORITY = "com.workshoporange.android.ozhoard";
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+    public static final String PATH_DEALS = "deals";
+    public static final String PATH_CATEGORY = "category";
+
+    // To make it easy to query for the exact date, we normalize all dates that go into
+    // the database to the start of the the Julian day at UTC.
+    public static long normalizeDate(long startDate) {
+        // normalize the start date to the beginning of the (UTC) day
+        Time time = new Time();
+        time.set(startDate);
+        int julianDay = Time.getJulianDay(startDate, time.gmtoff);
+        return time.setJulianDay(julianDay);
+    }
+
     /**
      * Inner class that defines the table contents of the category table
      */
     public static final class CategoryEntry implements BaseColumns {
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_CATEGORY).build();
+
+        public static final String CONTENT_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_CATEGORY;
+        public static final String CONTENT_ITEM_TYPE =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_CATEGORY;
+
+        public static Uri buildCategoryUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
         public static final String TABLE_NAME = "category";
 
         // Category label. Human readable for displaying nice label.
-        public static final String COLUMN_LABEL = "label";
+        public static final String COLUMN_CATEGORY_TITLE = "category_title";
         // In order to navigate to the correct category, a short path is needed.
-        public static final String COLUMN_PATH = "path";
+        public static final String COLUMN_CATEGORY_PATH = "category_path";
     }
 
     /**
@@ -23,7 +56,52 @@ public class DealsContract {
      */
     public static final class DealEntry implements BaseColumns {
 
-        public static final String TABLE_NAME = "deal";
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_DEALS).build();
+
+        public static final String CONTENT_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_DEALS;
+        public static final String CONTENT_ITEM_TYPE =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_DEALS;
+
+
+        public static Uri buildDealUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildDealCategory(String categoryPath) {
+            return CONTENT_URI.buildUpon().appendPath(categoryPath).build();
+        }
+
+        public static Uri buildDealCategoryWithStartDate(
+                String locationSetting, long startDate) {
+            long normalizedDate = normalizeDate(startDate);
+            return CONTENT_URI.buildUpon().appendPath(locationSetting)
+                    .appendQueryParameter(COLUMN_DATE, Long.toString(normalizedDate)).build();
+        }
+
+        public static Uri buildDealCategoryWithDate(String locationSetting, long date) {
+            return CONTENT_URI.buildUpon().appendPath(locationSetting)
+                    .appendPath(Long.toString(normalizeDate(date))).build();
+        }
+
+        public static String getCategoryPathFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
+        }
+
+        public static long getDateFromUri(Uri uri) {
+            return Long.parseLong(uri.getPathSegments().get(2));
+        }
+
+        public static long getStartDateFromUri(Uri uri) {
+            String dateString = uri.getQueryParameter(COLUMN_DATE);
+            if (null != dateString && dateString.length() > 0)
+                return Long.parseLong(dateString);
+            else
+                return 0;
+        }
+
+        public static final String TABLE_NAME = "deals";
 
         // Column with the foreign key into the category table.
         public static final String COLUMN_CAT_KEY = "category_id";

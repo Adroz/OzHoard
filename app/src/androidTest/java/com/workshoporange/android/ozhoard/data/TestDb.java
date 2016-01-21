@@ -84,8 +84,8 @@ public class TestDb extends AndroidTestCase {
         // Build a HashSet of all of the column names we want to look for.
         final HashSet<String> categoryColumnHashSet = new HashSet<>();
         categoryColumnHashSet.add(DealsContract.CategoryEntry._ID);
-        categoryColumnHashSet.add(DealsContract.CategoryEntry.COLUMN_LABEL);
-        categoryColumnHashSet.add(DealsContract.CategoryEntry.COLUMN_PATH);
+        categoryColumnHashSet.add(DealsContract.CategoryEntry.COLUMN_CATEGORY_TITLE);
+        categoryColumnHashSet.add(DealsContract.CategoryEntry.COLUMN_CATEGORY_PATH);
 
         int columnNameIndex = c.getColumnIndex("name");
         do {
