@@ -19,14 +19,12 @@ import com.workshoporange.android.ozhoard.data.DealsContract;
 public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolder> {
 
     private FragmentManager mSupportFragmentManager;
-    private int mLayout;
     private boolean mTwoPane;
 
-    public DealAdapter(FragmentManager supportFragmentManager, int layout, Cursor c, boolean twoPane) {
+    public DealAdapter(FragmentManager supportFragmentManager, Cursor c, boolean twoPane) {
         super(c);
         mSupportFragmentManager = supportFragmentManager;
         mTwoPane = twoPane;
-        mLayout = layout;
     }
 
     private String convertCursorRowToUXFormat(Cursor cursor) {
@@ -41,10 +39,8 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
 //                cursor.getDouble(idx_max_temp),
 //                cursor.getDouble(idx_min_temp));
 
-//        return Utility.formatDate(cursor.getLong(idx_date)) +
-//                " - " + cursor.getString(idx_short_desc) +
-//                " - " + highAndLow;
-        return cursor.getString(idx_title) + " - " +
+        return Utility.formatDate(cursor.getLong(idx_date)) + " " +
+                cursor.getString(idx_title) + " - " +
                 cursor.getString(idx_desc) + "-" +
                 cursor.getString(idx_link) + ", by " +
                 cursor.getString(idx_author);
@@ -53,14 +49,13 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(mLayout, parent, false);
+                .inflate(R.layout.deal_list_content, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final Cursor cursor) {
-//        holder.contentView.setText(convertCursorRowToUXFormat(cursor));
-        holder.contentView.setText("asdlasknda;sdlnas;ldknas;ldknasd;l");
+        holder.contentView.setText(convertCursorRowToUXFormat(cursor));
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

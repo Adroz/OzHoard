@@ -74,13 +74,8 @@ public class DealListActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportLoaderManager().initLoader(DEALS_LOADER, null, this);
-        // The CursorAdapter will take data from our cursor and populate the ListView.
-        mDealsAdapter = new DealAdapter(
-                getSupportFragmentManager(),
-                R.id.deal_detail_container,
-                null,
-                mTwoPane);
+        // The CursorAdapter will take data from our cursor and populate the RecyclerView.
+        mDealsAdapter = new DealAdapter(getSupportFragmentManager(), null, mTwoPane);
 
         setContentView(R.layout.activity_deal_list);
 
@@ -92,10 +87,8 @@ public class DealListActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Running FetchFeedTask", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                FetchDealsTask dealsTask = new FetchDealsTask(getApplicationContext());
-                dealsTask.execute("deals"); // Default category
+                updateDeals(view);
+                onChangeCategory();
             }
         });
 
@@ -110,6 +103,18 @@ public class DealListActivity extends AppCompatActivity
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
+        getSupportLoaderManager().initLoader(DEALS_LOADER, null, this);
+    }
+
+    private void onChangeCategory() {
+        getSupportLoaderManager().restartLoader(DEALS_LOADER, null, this);
+    }
+
+    private void updateDeals(View view) {
+        Snackbar.make(view, "Running FetchFeedTask", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+        FetchDealsTask dealsTask = new FetchDealsTask(getApplicationContext());
+        dealsTask.execute("deals"); // Default category
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -123,10 +128,9 @@ public class DealListActivity extends AppCompatActivity
 
         // Sort order:  Ascending, by date.
         String sortOrder = DealsContract.DealEntry.COLUMN_DATE + " ASC";
-        Uri dealForCategoryUri = DealsContract.DealEntry.buildDealCategoryWithStartDate(
-                categoryPath, System.currentTimeMillis());
+        Uri dealForCategoryUri = DealsContract.DealEntry.buildDealCategory(categoryPath);
 
-        return new CursorLoader(getApplicationContext(),
+        return new CursorLoader(this,
                 dealForCategoryUri,
                 DEAL_COLUMNS,
                 null,
