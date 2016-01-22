@@ -3,7 +3,9 @@ package com.workshoporange.android.ozhoard;
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -13,6 +15,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.workshoporange.android.ozhoard.customtabs.CustomTabActivityHelper;
+import com.workshoporange.android.ozhoard.customtabs.WebViewFallback;
 
 import static com.workshoporange.android.ozhoard.data.DealsContract.DealEntry;
 
@@ -25,6 +30,7 @@ import static com.workshoporange.android.ozhoard.data.DealsContract.DealEntry;
 public class DealDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private Uri mUri;
+    private String mDestinationLink;
 
     private static final int DETAIL_LOADER = 0;
 
@@ -84,6 +90,21 @@ public class DealDetailFragment extends Fragment implements LoaderManager.Loader
         View rootView = inflater.inflate(R.layout.deal_detail, container, false);
 
         mDealDetail = (TextView) rootView.findViewById(R.id.deal_detail);
+        mDealDetail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mDestinationLink != null) {
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
+                        CustomTabActivityHelper.openCustomTab(getActivity(),
+                                customTabsIntent, Uri.parse(mDestinationLink), new WebViewFallback());
+                    } else {
+                        WebViewFallback fallback = new WebViewFallback();
+                        fallback.openUri(getActivity(), Uri.parse(mDestinationLink));
+                    }
+                }
+            }
+        });
 
         return rootView;
     }
@@ -107,6 +128,8 @@ public class DealDetailFragment extends Fragment implements LoaderManager.Loader
                     null,
                     null
             );
+
+            // TODO: Add share action provider
         }
         return null;
     }
@@ -115,6 +138,7 @@ public class DealDetailFragment extends Fragment implements LoaderManager.Loader
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data != null && data.moveToFirst()) {
             mDealDetail.setText(data.getString(COL_DEAL_DESC));
+            mDestinationLink = data.getString(COL_DEAL_LINK);
         }
     }
 
