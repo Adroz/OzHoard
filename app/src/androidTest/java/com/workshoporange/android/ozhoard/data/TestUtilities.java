@@ -19,6 +19,7 @@ import java.util.Set;
 public class TestUtilities extends AndroidTestCase {
     static final String TEST_CATEGORY = "gaming";
     static final long TEST_DATE = 1419033600L;  // December 20th, 2014
+    static final String TEST_LINK = "https://www.ozbargain.com.au/node/231025";
 
     static void validateCursor(String error, Cursor valueCursor, ContentValues expectedValues) {
         assertTrue("Empty cursor returned. " + error, valueCursor.moveToFirst());
@@ -47,7 +48,7 @@ public class TestUtilities extends AndroidTestCase {
         dealValues.put(DealsContract.DealEntry.COLUMN_CAT_KEY, categoryRowId);
         dealValues.put(DealsContract.DealEntry.COLUMN_DATE, TEST_DATE);
         dealValues.put(DealsContract.DealEntry.COLUMN_TITLE, "Deals, deals, deals!");
-        dealValues.put(DealsContract.DealEntry.COLUMN_LINK, "www.deals.com");
+        dealValues.put(DealsContract.DealEntry.COLUMN_LINK, TEST_LINK);
         dealValues.put(DealsContract.DealEntry.COLUMN_DESC, "Boy have I got some deals for you!");
         dealValues.put(DealsContract.DealEntry.COLUMN_AUTHOR, "Nik Moores");
 

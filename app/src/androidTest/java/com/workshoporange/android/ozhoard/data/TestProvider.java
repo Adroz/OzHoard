@@ -123,6 +123,14 @@ public class TestProvider extends AndroidTestCase {
         assertEquals("Error: the DealEntry CONTENT_URI with category and date should return " +
                 "DealEntry.CONTENT_ITEM_TYPE", DealEntry.CONTENT_ITEM_TYPE, type);
 
+        String testLink = "https://www.ozbargain.com.au/node/231028";
+        // content://com.workshoporange.android.ozhoard/deals/internet/https://www.ozbargain.com.au/node/231028
+        type = mContext.getContentResolver().getType(
+                DealEntry.buildDealCategoryWithLink(testCategory, testLink));
+        // vnd.android.cursor.item/com.workshoporange.android.ozhoard/deals/https://www.ozbargain.com.au/node/231028
+        assertEquals("Error: the DealEntry CONTENT_URI with category and link should return " +
+                "DealEntry.CONTENT_ITEM_TYPE", DealEntry.CONTENT_ITEM_TYPE, type);
+
         // content://com.workshoporange.android.ozhoard/category/
         type = mContext.getContentResolver().getType(CategoryEntry.CONTENT_URI);
         // vnd.android.cursor.dir/com.workshoporange.android.ozhoard/category
@@ -179,7 +187,7 @@ public class TestProvider extends AndroidTestCase {
         // Has the NotificationUri been set correctly? --- can only test this easily against API
         // level 19 or greater because getNotificationUri was added in API level 19.
         if (Build.VERSION.SDK_INT >= 19) {
-            assertEquals("Error: Location Query did not properly set NotificationUri",
+            assertEquals("Error: Category Query did not properly set NotificationUri",
                     categoryCursor.getNotificationUri(), CategoryEntry.CONTENT_URI);
         }
     }
@@ -292,7 +300,7 @@ public class TestProvider extends AndroidTestCase {
         TestUtilities.validateCursor("testInsertReadProvider.  Error validating joined Deals and " +
                 "Category Data with start date.", dealsCursor, dealValues);
 
-        // Get the joined Weather data for a specific date
+        // Get the joined Deals data for a specific date
         dealsCursor = mContext.getContentResolver().query(
                 DealEntry.buildDealCategoryWithDate(TestUtilities.TEST_CATEGORY, TestUtilities.TEST_DATE),
                 null,
@@ -302,6 +310,17 @@ public class TestProvider extends AndroidTestCase {
         );
         TestUtilities.validateCursor("testInsertReadProvider. Error validating joined Deals and " +
                 "Category data for a specific date.", dealsCursor, dealValues);
+
+        // Get the joined Deals data for a specific link
+        dealsCursor = mContext.getContentResolver().query(
+                DealEntry.buildDealCategoryWithLink(TestUtilities.TEST_CATEGORY, TestUtilities.TEST_LINK),
+                null,
+                null,
+                null,
+                null
+        );
+        TestUtilities.validateCursor("testInsertReadProvider. Error validating joined Deals and " +
+                "Category data for a specific link.", dealsCursor, dealValues);
     }
 
     // Make sure records can still be deleted after adding/updating stuff.

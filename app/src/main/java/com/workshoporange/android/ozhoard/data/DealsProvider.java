@@ -25,6 +25,7 @@ public class DealsProvider extends ContentProvider {
     static final int DEALS = 100;
     static final int DEALS_WITH_CATEGORY = 101;
     static final int DEALS_WITH_CATEGORY_AND_DATE = 102;
+    static final int DEALS_WITH_CATEGORY_AND_LINK = 103;
     static final int CATEGORY = 300;
 
     private static final SQLiteQueryBuilder sDealsByCategoryIdQueryBuilder;
@@ -60,6 +61,12 @@ public class DealsProvider extends ContentProvider {
                     "." + CategoryEntry.COLUMN_CATEGORY_PATH + " = ? AND " +
                     DealEntry.COLUMN_DATE + " = ? ";
 
+    //category.category_path = ? AND date = ?
+    private static final String sCategoryPathAndLinkSelection =
+            CategoryEntry.TABLE_NAME +
+                    "." + CategoryEntry.COLUMN_CATEGORY_PATH + " = ? AND " +
+                    DealEntry.COLUMN_LINK + " = ? ";
+
     private Cursor getDealsByCategoryPath(Uri uri, String[] projection, String sortOrder) {
         String categoryPath = DealEntry.getCategoryPathFromUri(uri);
         long startDate = DealEntry.getStartDateFromUri(uri);
@@ -85,8 +92,7 @@ public class DealsProvider extends ContentProvider {
         );
     }
 
-    private Cursor getDealsByCategoryPathAndDate(
-            Uri uri, String[] projection, String sortOrder) {
+    private Cursor getDealsByCategoryPathAndDate(Uri uri, String[] projection, String sortOrder) {
         String categoryPath = DealEntry.getCategoryPathFromUri(uri);
         long date = DealEntry.getDateFromUri(uri);
 
@@ -100,6 +106,20 @@ public class DealsProvider extends ContentProvider {
         );
     }
 
+    private Cursor getDealsByCategoryPathAndLink(Uri uri, String[] projection, String sortOrder) {
+        String categoryPath = DealEntry.getCategoryPathFromUri(uri);
+        String link = DealEntry.getLinkFromUri(uri);
+
+        return sDealsByCategoryIdQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                sCategoryPathAndLinkSelection,
+                new String[]{categoryPath, link},
+                null,
+                null,
+                sortOrder
+        );
+    }
+
     static UriMatcher buildUriMatcher() {
         final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = CONTENT_AUTHORITY;
@@ -107,6 +127,7 @@ public class DealsProvider extends ContentProvider {
         sURIMatcher.addURI(authority, PATH_DEALS, DEALS);
         sURIMatcher.addURI(authority, PATH_DEALS + "/*", DEALS_WITH_CATEGORY);
         sURIMatcher.addURI(authority, PATH_DEALS + "/*/#", DEALS_WITH_CATEGORY_AND_DATE);
+        sURIMatcher.addURI(authority, PATH_DEALS + "/*/*", DEALS_WITH_CATEGORY_AND_LINK);
         sURIMatcher.addURI(authority, PATH_CATEGORY, CATEGORY);
 
         return sURIMatcher;
@@ -126,6 +147,8 @@ public class DealsProvider extends ContentProvider {
         switch (match) {
             case DEALS_WITH_CATEGORY_AND_DATE:
                 return DealEntry.CONTENT_ITEM_TYPE;
+            case DEALS_WITH_CATEGORY_AND_LINK:
+                return DealEntry.CONTENT_ITEM_TYPE;
             case DEALS_WITH_CATEGORY:
                 return DealEntry.CONTENT_TYPE;
             case DEALS:
@@ -144,9 +167,13 @@ public class DealsProvider extends ContentProvider {
         // and query the database accordingly.
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
-            // "deals/*/*"
+            // "deals/*/#"
             case DEALS_WITH_CATEGORY_AND_DATE:
                 retCursor = getDealsByCategoryPathAndDate(uri, projection, sortOrder);
+                break;
+            // "deals/*/*"
+            case DEALS_WITH_CATEGORY_AND_LINK:
+                retCursor = getDealsByCategoryPathAndLink(uri, projection, sortOrder);
                 break;
             // "deals/*"
             case DEALS_WITH_CATEGORY:

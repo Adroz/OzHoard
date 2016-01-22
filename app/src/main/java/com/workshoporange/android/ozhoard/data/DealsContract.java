@@ -72,12 +72,21 @@ public class DealsContract {
                     .appendPath(Long.toString(date)).build();
         }
 
+        public static Uri buildDealCategoryWithLink(String categoryPath, String link) {
+            return CONTENT_URI.buildUpon().appendPath(categoryPath)
+                    .appendPath(link).build();
+        }
+
         public static String getCategoryPathFromUri(Uri uri) {
             return uri.getPathSegments().get(1);
         }
 
         public static long getDateFromUri(Uri uri) {
             return Long.parseLong(uri.getPathSegments().get(2));
+        }
+
+        public static String getLinkFromUri(Uri uri) {
+            return uri.getPathSegments().get(2);
         }
 
         public static long getStartDateFromUri(Uri uri) {
