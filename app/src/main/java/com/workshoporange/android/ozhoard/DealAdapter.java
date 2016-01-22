@@ -54,15 +54,19 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, final Cursor cursor) {
+    public void onBindViewHolder(final ViewHolder holder, Cursor cursor) {
+//                String categoryPath = Utility.getPreferredLocation(getActivity());
+        String categoryPath = "deals";          // TODO: Add support for different categories
+        final String uriString = DealsContract.DealEntry.buildDealCategoryWithLink(categoryPath,
+                cursor.getString(DealListActivity.COL_DEAL_LINK)).toString();
+
         holder.contentView.setText(convertCursorRowToUXFormat(cursor));
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(DealDetailFragment.ARG_ITEM_ID,
-                            cursor.getString(DealListActivity.COL_DEAL_TITLE));
+                    arguments.putString(DealDetailFragment.DETAIL_URI, uriString);
                     DealDetailFragment fragment = new DealDetailFragment();
                     fragment.setArguments(arguments);
                     mSupportFragmentManager.beginTransaction()
@@ -71,8 +75,7 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
                 } else {
                     Context context = v.getContext();
                     Intent intent = new Intent(context, DealDetailActivity.class);
-                    intent.putExtra(DealDetailFragment.ARG_ITEM_ID,
-                            cursor.getString(DealListActivity.COL_DEAL_TITLE));
+                    intent.putExtra(DealDetailFragment.DETAIL_URI, uriString);
 
                     context.startActivity(intent);
                 }
