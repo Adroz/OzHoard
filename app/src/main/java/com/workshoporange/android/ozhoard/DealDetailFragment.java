@@ -9,6 +9,7 @@ import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
@@ -30,7 +31,7 @@ import static com.workshoporange.android.ozhoard.data.DealsContract.DealEntry;
 public class DealDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private Uri mUri;
-    private String mDestinationLink;
+    private Uri mDestinationLink;
 
     private static final int DETAIL_LOADER = 0;
 
@@ -59,6 +60,9 @@ public class DealDetailFragment extends Fragment implements LoaderManager.Loader
 
     TextView mDealDetail;
 
+    CustomTabActivityHelper mCustomTabActivityHelper;
+    CustomTabsIntent customTabsIntent;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -82,6 +86,8 @@ public class DealDetailFragment extends Fragment implements LoaderManager.Loader
                 }
             }
         }
+
+        mCustomTabActivityHelper = new CustomTabActivityHelper();
     }
 
     @Override
@@ -95,12 +101,12 @@ public class DealDetailFragment extends Fragment implements LoaderManager.Loader
             public void onClick(View view) {
                 if (mDestinationLink != null) {
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
+                        // Show the Custom Tab
                         CustomTabActivityHelper.openCustomTab(getActivity(),
-                                customTabsIntent, Uri.parse(mDestinationLink), new WebViewFallback());
+                                customTabsIntent, mDestinationLink, new WebViewFallback());
                     } else {
                         WebViewFallback fallback = new WebViewFallback();
-                        fallback.openUri(getActivity(), Uri.parse(mDestinationLink));
+                        fallback.openUri(getActivity(), mDestinationLink);
                     }
                 }
             }
@@ -109,10 +115,33 @@ public class DealDetailFragment extends Fragment implements LoaderManager.Loader
         return rootView;
     }
 
+    private void setUpCustomTabWithUrl(final Uri uri) {
+        // Tells the browser of a likely future navigation to a URL.
+        mCustomTabActivityHelper.mayLaunchUrl(uri, null, null);
+
+        // Tab customisation
+        customTabsIntent = new CustomTabsIntent.Builder(mCustomTabActivityHelper.getSession())
+                .setToolbarColor(ContextCompat.getColor(getContext(), R.color.colorPrimary))
+                .setShowTitle(true)
+                .build();
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mCustomTabActivityHelper.bindCustomTabsService(getActivity());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStart();
+        mCustomTabActivityHelper.unbindCustomTabsService(getActivity());
     }
 
     @Override
@@ -138,7 +167,9 @@ public class DealDetailFragment extends Fragment implements LoaderManager.Loader
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data != null && data.moveToFirst()) {
             mDealDetail.setText(data.getString(COL_DEAL_DESC));
-            mDestinationLink = data.getString(COL_DEAL_LINK);
+            mDestinationLink = Uri.parse(data.getString(COL_DEAL_LINK));
+
+            setUpCustomTabWithUrl(mDestinationLink);
         }
     }
 
