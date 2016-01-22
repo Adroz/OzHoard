@@ -398,7 +398,7 @@ public class TestProvider extends AndroidTestCase {
                 null,
                 null,
                 null,
-                DealEntry.COLUMN_DATE + " ASC"  // sort order == by DATE ASCENDING
+                DealEntry.COLUMN_DATE + " DESC"  // sort order == by DATE DESCENDING
         );
 
         // Should have as many records as we inserted

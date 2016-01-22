@@ -126,8 +126,8 @@ public class DealListActivity extends AppCompatActivity
 //        String categoryPath = Utility.getPreferredCategory(getActivity());
         String categoryPath = "deals";  // TODO: Get real path
 
-        // Sort order:  Ascending, by date.
-        String sortOrder = DealsContract.DealEntry.COLUMN_DATE + " ASC";
+        // Sort order:  Descending, by date.
+        String sortOrder = DealsContract.DealEntry.COLUMN_DATE + " DESC";
         Uri dealForCategoryUri = DealsContract.DealEntry.buildDealCategory(categoryPath);
 
         return new CursorLoader(this,
