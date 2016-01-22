@@ -6,4 +6,5 @@
     android:layout_height="match_parent"
     android:padding="16dp"
     android:textIsSelectable="true"
-    tools:context="com.workshoporange.android.ozhoard.DealDetailFragment" />
+    tools:context="com.workshoporange.android.ozhoard.DealDetailFragment"
+    tools:text="Deals, deals, deals" />
