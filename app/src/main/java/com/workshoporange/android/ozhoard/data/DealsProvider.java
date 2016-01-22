@@ -192,7 +192,6 @@ public class DealsProvider extends ContentProvider {
 
         switch (match) {
             case DEALS: {
-                normalizeDate(values);
                 long _id = db.insert(DealEntry.TABLE_NAME, null, values);
                 if (_id > 0)
                     returnUri = DealEntry.buildDealUri(_id);
@@ -239,14 +238,6 @@ public class DealsProvider extends ContentProvider {
         return rowsDeleted;
     }
 
-    private void normalizeDate(ContentValues values) {
-        // normalize the date value
-        if (values.containsKey(DealEntry.COLUMN_DATE)) {
-            long dateValue = values.getAsLong(DealEntry.COLUMN_DATE);
-            values.put(DealEntry.COLUMN_DATE, DealsContract.normalizeDate(dateValue));
-        }
-    }
-
     @Override
     public int update(
             Uri uri, ContentValues values, String selection, String[] selectionArgs) {
@@ -255,7 +246,6 @@ public class DealsProvider extends ContentProvider {
         int rowsUpdated;
         switch (match) {
             case DEALS: {
-                normalizeDate(values);
                 rowsUpdated = db.update(DealEntry.TABLE_NAME, values,
                         selection, selectionArgs);
                 break;
@@ -284,7 +274,6 @@ public class DealsProvider extends ContentProvider {
                 int returnCount = 0;
                 try {
                     for (ContentValues value : values) {
-                        normalizeDate(value);
                         long _id = db.insert(DealEntry.TABLE_NAME, null, value);
                         if (_id != -1) {
                             returnCount++;

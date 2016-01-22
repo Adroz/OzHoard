@@ -103,7 +103,7 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
 //        int count = 0;
         ArrayList<String> headlines = new ArrayList<>();
         ArrayList<String> links = new ArrayList<>();
-        ArrayList<String> dates = new ArrayList<>();
+        ArrayList<Long> dates = new ArrayList<>();
         ArrayList<String> authors = new ArrayList<>();
 
         String categoryTitle = "";
@@ -124,8 +124,10 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                     if (insideItem)
                         links.add(xpp.nextText());          // Extract the deal's link
                 } else if (xpp.getName().equalsIgnoreCase(OB_DATE)) {
-                    if (insideItem)
-                        dates.add(xpp.nextText());          // Extract the posting date
+                    if (insideItem) {
+                        long date = Utility.formatDateToLong(xpp.nextText(), Utility.OB_DATE_FORMAT);
+                        dates.add(date);                    // Extract the posting date
+                    }
                 } else if (xpp.getName().equalsIgnoreCase(OB_AUTHOR)) {
                     if (insideItem) authors.add(xpp.nextText()); // Extract the author
                 }
