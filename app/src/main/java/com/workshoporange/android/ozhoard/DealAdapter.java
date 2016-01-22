@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.workshoporange.android.ozhoard.data.DealsContract;
+import com.workshoporange.android.ozhoard.utils.RecyclerViewCursorAdapter;
+import com.workshoporange.android.ozhoard.utils.Utility;
 
 /**
  * Created by Nik on 21/01/2016.

@@ -1,4 +1,4 @@
-package com.workshoporange.android.ozhoard;
+package com.workshoporange.android.ozhoard.utils;
 
 /*
  * The MIT License (MIT)

@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.workshoporange.android.ozhoard.data.DealsContract;
+import com.workshoporange.android.ozhoard.utils.Utility;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

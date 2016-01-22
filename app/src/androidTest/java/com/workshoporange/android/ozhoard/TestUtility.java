@@ -2,6 +2,8 @@ package com.workshoporange.android.ozhoard;
 
 import android.test.AndroidTestCase;
 
+import com.workshoporange.android.ozhoard.utils.Utility;
+
 /**
  * Created by Nik on 22/01/2016.
  */

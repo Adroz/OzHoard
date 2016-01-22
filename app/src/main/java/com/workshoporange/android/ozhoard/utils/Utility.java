@@ -1,4 +1,4 @@
-package com.workshoporange.android.ozhoard;
+package com.workshoporange.android.ozhoard.utils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -15,7 +15,7 @@ public class Utility {
     // back into date objects for comparison/processing.
     public static final String OB_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss ZZZZZ";
 
-    static long formatDateToLong(String time, String dateFormat) {
+    public static long formatDateToLong(String time, String dateFormat) {
         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat, Locale.US);
         try {
             Date date = formatter.parse(time);
@@ -30,7 +30,7 @@ public class Utility {
 //        calendar.setTimeInMillis(date);
     }
 
-    static String formatDate(long dateInMillis) {
+    public static String formatDate(long dateInMillis) {
         Date date = new Date(dateInMillis);
         return DateFormat.getDateInstance().format(date);
     }
