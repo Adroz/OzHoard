@@ -1,7 +1,5 @@
 package com.workshoporange.android.ozhoard;
 
-import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,16 +12,10 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.workshoporange.android.ozhoard.data.DealsContract;
-import com.workshoporange.android.ozhoard.deal.DealContent;
-
-import java.util.List;
 
 /**
  * An activity representing a list of Deals. This activity
@@ -151,94 +143,5 @@ public class DealListActivity extends AppCompatActivity
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mDealsAdapter.swapCursor(null);
-    }
-
-    public class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
-
-        private final List<DealContent.Deal> mValues;
-
-        public SimpleItemRecyclerViewAdapter(List<DealContent.Deal> items) {
-            mValues = items;
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.deal_list_content, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mItem = mValues.get(position);
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).details);
-
-            holder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mTwoPane) {
-                        Bundle arguments = new Bundle();
-                        arguments.putString(DealDetailFragment.ARG_ITEM_ID, holder.mItem.id);
-                        DealDetailFragment fragment = new DealDetailFragment();
-                        fragment.setArguments(arguments);
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.deal_detail_container, fragment)
-                                .commit();
-                    } else {
-                        Context context = v.getContext();
-                        Intent intent = new Intent(context, DealDetailActivity.class);
-                        intent.putExtra(DealDetailFragment.ARG_ITEM_ID, holder.mItem.id);
-
-                        context.startActivity(intent);
-                    }
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return mValues.size();
-        }
-
-        public void add(DealContent.Deal item) {
-            add(mValues.size(), item);
-        }
-
-        public void add(int position, DealContent.Deal item) {
-            mValues.add(position, item);
-            notifyItemInserted(position);
-        }
-
-        public void remove(DealContent.Deal item) {
-            int position = mValues.indexOf(item);
-            mValues.remove(position);
-            notifyItemRemoved(position);
-        }
-
-        public void clear() {
-            mValues.clear();
-            notifyDataSetChanged();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-            public final TextView mIdView;
-            public final TextView mContentView;
-            public DealContent.Deal mItem;
-
-            public ViewHolder(View view) {
-                super(view);
-                mView = view;
-                mIdView = (TextView) view.findViewById(R.id.id);
-                mContentView = (TextView) view.findViewById(R.id.content);
-            }
-
-            @Override
-            public String toString() {
-                return super.toString() + " '" + mContentView.getText() + "'";
-            }
-        }
     }
 }
