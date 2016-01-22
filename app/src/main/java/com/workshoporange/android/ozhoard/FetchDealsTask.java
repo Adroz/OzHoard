@@ -90,6 +90,7 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
         final String RSS_ITEM = "item";
         final String RSS_TITLE = "title";
         final String RSS_LINK = "link";
+        final String RSS_DESCRIPTION = "description";
 
         final String OB_DATE = "pubDate";
         final String OB_AUTHOR = "creator";
@@ -99,15 +100,12 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
         XmlPullParser xpp = factory.newPullParser();
         xpp.setInput(new StringReader(feedXmlStr));
 
-//        String[] resultStrs = new String[numDeals];
-//        int count = 0;
         ArrayList<String> headlines = new ArrayList<>();
         ArrayList<String> links = new ArrayList<>();
+        ArrayList<String> descriptions = new ArrayList<>();
         ArrayList<Long> dates = new ArrayList<>();
         ArrayList<String> authors = new ArrayList<>();
-
         String categoryTitle = "";
-
 
         int eventType = xpp.getEventType();
         while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -123,6 +121,9 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                 } else if (xpp.getName().equalsIgnoreCase(RSS_LINK)) {
                     if (insideItem)
                         links.add(xpp.nextText());          // Extract the deal's link
+                } else if (xpp.getName().equalsIgnoreCase(RSS_DESCRIPTION)) {
+                    if (insideItem)
+                        descriptions.add(xpp.nextText());   // Extract the deal's description
                 } else if (xpp.getName().equalsIgnoreCase(OB_DATE)) {
                     if (insideItem) {
                         long date = Utility.formatDateToLong(xpp.nextText(), Utility.OB_DATE_FORMAT);
@@ -131,12 +132,6 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                 } else if (xpp.getName().equalsIgnoreCase(OB_AUTHOR)) {
                     if (insideItem) authors.add(xpp.nextText()); // Extract the author
                 }
-//            } else if (eventType == XmlPullParser.END_TAG
-//                    && xpp.getName().equalsIgnoreCase(RSS_ITEM)) {
-//                insideItem = false;
-//                resultStrs[count] = headlines.get(count) + " - " + links.get(count)
-//                        + " (" + dates.get(count) + ", by: " + authors.get(count) + ")"; // Construct string.
-//                count++;
             }
             eventType = xpp.next();
         }
@@ -150,7 +145,7 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
             dealValues.put(DealsContract.DealEntry.COLUMN_DATE, dates.get(i));
             dealValues.put(DealsContract.DealEntry.COLUMN_TITLE, headlines.get(i));
             dealValues.put(DealsContract.DealEntry.COLUMN_LINK, links.get(i));
-            dealValues.put(DealsContract.DealEntry.COLUMN_DESC, "Boy have I got some deals for you!"); // TODO: Implement description extraction and formatting
+            dealValues.put(DealsContract.DealEntry.COLUMN_DESC, descriptions.get(i));
             dealValues.put(DealsContract.DealEntry.COLUMN_AUTHOR, authors.get(i));
 
             cVVector.add(dealValues);
