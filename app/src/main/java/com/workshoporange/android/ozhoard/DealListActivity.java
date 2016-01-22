@@ -1,5 +1,6 @@
 package com.workshoporange.android.ozhoard;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,13 +27,10 @@ import com.workshoporange.android.ozhoard.data.DealsContract;
  * item details side-by-side using two vertical panes.
  */
 public class DealListActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<Cursor> {
+        implements LoaderManager.LoaderCallbacks<Cursor>, DealAdapter.Callback {
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
-     */
-    private boolean mTwoPane;
-
+    private final String DETAILFRAGMENT_TAG = "DFTAG";
+    private boolean mTwoPane = false;
     private DealAdapter mDealsAdapter;
     private RecyclerView mRecyclerView;
     private int mPosition = ListView.INVALID_POSITION;
@@ -67,7 +65,7 @@ public class DealListActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // The CursorAdapter will take data from our cursor and populate the RecyclerView.
-        mDealsAdapter = new DealAdapter(getSupportFragmentManager(), null, mTwoPane);
+        mDealsAdapter = new DealAdapter(this, null);
 
         setContentView(R.layout.activity_deal_list);
 
@@ -94,6 +92,16 @@ public class DealListActivity extends AppCompatActivity
             // If this view is present, then the
             // activity should be in two-pane mode.
             mTwoPane = true;
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.deal_detail_container,
+                                new DealDetailFragment(),
+                                DETAILFRAGMENT_TAG)
+                        .commit();
+            }
         }
         getSupportLoaderManager().initLoader(DEALS_LOADER, null, this);
     }
@@ -111,6 +119,27 @@ public class DealListActivity extends AppCompatActivity
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setAdapter(mDealsAdapter);
+    }
+
+    @Override
+    public void onItemSelected(Uri contentUri) {
+        if (mTwoPane) {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(DealDetailFragment.DETAIL_URI, contentUri);
+            DealDetailFragment fragment = new DealDetailFragment();
+            fragment.setArguments(arguments);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.deal_detail_container, fragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DealDetailActivity.class);
+            intent.setData(contentUri);
+
+            startActivity(intent);
+        }
     }
 
     @Override

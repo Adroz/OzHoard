@@ -33,13 +33,15 @@ public class DealDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments().containsKey(DETAIL_URI)) {
-            Uri uri = Uri.parse(getArguments().getString(DETAIL_URI, "No URI"));
+        if (getArguments() != null) {
+            if (getArguments().containsKey(DETAIL_URI)) {
+                Uri uri = getArguments().getParcelable(DETAIL_URI);
 
-            Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setTitle(uri.getPathSegments().get(2));
+                Activity activity = this.getActivity();
+                CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+                if (appBarLayout != null) {
+                    appBarLayout.setTitle(uri.getPathSegments().get(2));
+                }
             }
         }
     }

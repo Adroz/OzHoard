@@ -1,10 +1,8 @@
 package com.workshoporange.android.ozhoard;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,13 +16,11 @@ import com.workshoporange.android.ozhoard.data.DealsContract;
  */
 public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolder> {
 
-    private FragmentManager mSupportFragmentManager;
-    private boolean mTwoPane;
+    private Context mContext;
 
-    public DealAdapter(FragmentManager supportFragmentManager, Cursor c, boolean twoPane) {
-        super(c);
-        mSupportFragmentManager = supportFragmentManager;
-        mTwoPane = twoPane;
+    public DealAdapter(Context context, Cursor cursor) {
+        super(cursor);
+        mContext = context;
     }
 
     private String convertCursorRowToUXFormat(Cursor cursor) {
@@ -54,31 +50,18 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, Cursor cursor) {
-//                String categoryPath = Utility.getPreferredLocation(getActivity());
-        String categoryPath = "deals";          // TODO: Add support for different categories
-        final String uriString = DealsContract.DealEntry.buildDealCategoryWithLink(categoryPath,
-                cursor.getString(DealListActivity.COL_DEAL_LINK)).toString();
-
+    public void onBindViewHolder(ViewHolder holder, final Cursor cursor) {
         holder.contentView.setText(convertCursorRowToUXFormat(cursor));
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mTwoPane) {
-                    Bundle arguments = new Bundle();
-                    arguments.putString(DealDetailFragment.DETAIL_URI, uriString);
-                    DealDetailFragment fragment = new DealDetailFragment();
-                    fragment.setArguments(arguments);
-                    mSupportFragmentManager.beginTransaction()
-                            .replace(R.id.deal_detail_container, fragment)
-                            .commit();
-                } else {
-                    Context context = v.getContext();
-                    Intent intent = new Intent(context, DealDetailActivity.class);
-                    intent.putExtra(DealDetailFragment.DETAIL_URI, uriString);
-
-                    context.startActivity(intent);
-                }
+                // String categoryPath = Utility.getPreferredLocation(getActivity());
+                final String categoryPath = "deals";          // TODO: Add support for different categories
+                ((Callback) mContext).onItemSelected(
+                        DealsContract.DealEntry.buildDealCategoryWithLink(
+                                categoryPath,
+                                cursor.getString(DealListActivity.COL_DEAL_LINK))
+                );
             }
         });
     }
@@ -86,6 +69,18 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
     @Override
     public Cursor swapCursor(Cursor c) {
         return super.swapCursor(c);
+    }
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DealDetailFragmentCallback for when an item has been selected.
+         */
+        void onItemSelected(Uri dateUri);
     }
 
     /**
