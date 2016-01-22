@@ -9,7 +9,7 @@ public class TestDealsContract extends AndroidTestCase {
     private static final String TEST_DEAL_CATEGORY = "/Toys";
     private static final long TEST_DEAL_DATE = 1419033600L;  // December 20th, 2014
 
-    public void testBuildWeatherLocation() {
+    public void testBuildDealCategory() {
         Uri categoryUri = DealsContract.DealEntry.buildDealCategory(TEST_DEAL_CATEGORY);
         assertNotNull("Error: Null Uri returned. You must fill-in buildDealCategory in " +
                         "DealsContract.",

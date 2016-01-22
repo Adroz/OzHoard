@@ -123,7 +123,7 @@ public class DealListActivity extends AppCompatActivity
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-//        String categoryPath = Utility.getPreferredLocation(getActivity());
+//        String categoryPath = Utility.getPreferredCategory(getActivity());
         String categoryPath = "deals";  // TODO: Get real path
 
         // Sort order:  Ascending, by date.
