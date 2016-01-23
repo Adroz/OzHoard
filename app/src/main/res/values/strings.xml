@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Oz Hoard</string>
     <string name="title_deal_detail">Deal Detail</string>
+    <string name="deal_image">deal image</string>
 </resources>

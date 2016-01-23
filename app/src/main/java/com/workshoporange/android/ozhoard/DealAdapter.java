@@ -4,9 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.workshoporange.android.ozhoard.data.DealsContract;
@@ -53,7 +55,30 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final Cursor cursor) {
-        holder.contentView.setText(convertCursorRowToUXFormat(cursor));
+        // Net score
+        holder.netScoreView.setText("XXX");                                 // TODO: Get net score
+
+        // Author and category in the format "joe_blow in Pizza"
+        Spanned authorCategory = Utility.formatAuthorAndCategory(
+                holder.mView.getContext(),
+                cursor.getString(DealListActivity.COL_DEAL_AUTHOR),
+                cursor.getString(DealListActivity.COL_CATEGORY_TITLE)
+        );
+        holder.authorCategoryView.setText(authorCategory);
+
+        // Deal's title
+        holder.titleView.setText(cursor.getString(DealListActivity.COL_DEAL_TITLE));
+
+        // Time since posted, # comments, time until expired
+        String timeCommentsExpiry = Utility.formatTimeCommentsExpiry(
+                cursor.getLong(DealListActivity.COL_DEAL_DATE),
+                123,                                                        // TODO: Get comment count
+                11111111111L                                                // TODO: Get expiry date
+        );
+        holder.timeCommentsExpiryView.setText(timeCommentsExpiry);
+
+        holder.imageView.setImageResource(R.mipmap.ic_launcher);            // TODO: Get real image
+
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,24 +115,20 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
      */
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView idView;
-        public final TextView contentView;
-//    public final ImageView iconView;
-//    public final TextView dateView;
-//    public final TextView descriptionView;
-//    public final TextView highTempView;
-//    public final TextView lowTempView;
+        public final TextView netScoreView;
+        public final TextView authorCategoryView;
+        public final TextView titleView;
+        public final TextView timeCommentsExpiryView;
+        public final ImageView imageView;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            idView = (TextView) view.findViewById(R.id.id);
-            contentView = (TextView) view.findViewById(R.id.content);
-//        iconView = (ImageView) view.findViewById(R.id.list_item_icon);
-//        dateView = (TextView) view.findViewById(R.id.list_item_date_textview);
-//        descriptionView = (TextView) view.findViewById(R.id.list_item_textview);
-//        highTempView = (TextView) view.findViewById(R.id.list_item_high_textview);
-//        lowTempView = (TextView) view.findViewById(R.id.list_item_low_textview);
+            netScoreView = (TextView) view.findViewById(R.id.net_score);
+            authorCategoryView = (TextView) view.findViewById(R.id.author_and_category);
+            titleView = (TextView) view.findViewById(R.id.deal_title);
+            timeCommentsExpiryView = (TextView) view.findViewById(R.id.time_comments_expiry);
+            imageView = (ImageView) view.findViewById(R.id.deal_image);
         }
     }
 }

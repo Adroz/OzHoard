@@ -1,5 +1,12 @@
 package com.workshoporange.android.ozhoard.utils;
 
+import android.content.Context;
+import android.support.v4.content.ContextCompat;
+import android.text.Html;
+import android.text.Spanned;
+
+import com.workshoporange.android.ozhoard.R;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,6 +17,25 @@ import java.util.Locale;
  * Created by Nik on 21/01/2016.
  */
 public class Utility {
+
+    public static Spanned formatAuthorAndCategory(Context context, String author, String category) {
+        String themeColor = String.format("#%06X",
+                (0xFFFFFF & ContextCompat.getColor(context, R.color.colorPrimaryDark)));
+        return Html.fromHtml("<font color=\"" + themeColor + "\">" + author + "</font>"
+                + " in " +
+                "<font color=\"" + themeColor + "\">" + category + "</font>");
+    }
+
+    public static String formatTimeCommentsExpiry(long postTime, int comments, long expiry) {
+        String postTimeString = getFriendlyTime(postTime);
+        String commentString = (comments == 1) ? "1 comment" : comments + " comments";
+        String expiryString = getFriendlyTime(expiry);
+        return postTimeString + " ago - " + commentString + " - expires in " + expiryString;
+    }
+
+    public static String getFriendlyTime(long time) {
+        return "dummyTime";
+    }
 
     // Format used for storing dates in the database.  Also used for converting those strings
     // back into date objects for comparison/processing.
