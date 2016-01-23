@@ -46,6 +46,10 @@ public class DealListActivity extends AppCompatActivity
             DealsContract.DealEntry.COLUMN_LINK,
             DealsContract.DealEntry.COLUMN_DESC,
             DealsContract.DealEntry.COLUMN_AUTHOR,
+            DealsContract.DealEntry.COLUMN_SCORE,
+            DealsContract.DealEntry.COLUMN_COMMENT_COUNT,
+            DealsContract.DealEntry.COLUMN_EXPIRY,
+            DealsContract.DealEntry.COLUMN_IMAGE,
             DealsContract.CategoryEntry.COLUMN_CATEGORY_PATH,
             DealsContract.CategoryEntry.COLUMN_CATEGORY_TITLE
     };
@@ -57,8 +61,12 @@ public class DealListActivity extends AppCompatActivity
     static final int COL_DEAL_LINK = 3;
     static final int COL_DEAL_DESC = 4;
     static final int COL_DEAL_AUTHOR = 5;
-    static final int COL_CATEGORY_PATH = 6;
-    static final int COL_CATEGORY_TITLE = 7;
+    static final int COL_DEAL_SCORE = 6;
+    static final int COL_DEAL_COMMENTS = 7;
+    static final int COL_DEAL_EXPIRY = 8;
+    static final int COL_DEAL_IMAGE = 9;
+    static final int COL_CATEGORY_PATH = 10;
+    static final int COL_CATEGORY_TITLE = 11;
 
 
     @Override

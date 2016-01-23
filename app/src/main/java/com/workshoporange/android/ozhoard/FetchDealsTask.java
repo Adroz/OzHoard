@@ -131,7 +131,7 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                         descriptions.add(xpp.nextText());   // Extract the deal's description
                 } else if (xpp.getName().equalsIgnoreCase(OB_DATE)) {
                     if (insideItem) {
-                        long date = Utility.formatDateToLong(xpp.nextText(), Utility.OB_DATE_FORMAT);
+                        long date = Utility.formatDateToMillis(xpp.nextText(), Utility.OB_DATE_FORMAT);
                         dates.add(date);                    // Extract the posting date
                     }
                 } else if (xpp.getName().equalsIgnoreCase(OB_AUTHOR)) {
@@ -193,7 +193,7 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
         final String META_EXPIRY = "expiry";
 
         String expiryString = xmlPullParser.getAttributeValue(null, META_EXPIRY);
-        return (expiryString == null) ? 0L : Utility.formatDateToLong(expiryString, Utility.OB_EXPIRY_DATE_FORMAT);
+        return (expiryString == null) ? 0L : Utility.formatDateToMillis(expiryString, Utility.OB_EXPIRY_DATE_FORMAT);
     }
 
     private int getCommentCount(String meta) {

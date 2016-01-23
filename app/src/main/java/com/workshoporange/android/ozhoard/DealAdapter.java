@@ -27,25 +27,6 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
         mContext = context;
     }
 
-    private String convertCursorRowToUXFormat(Cursor cursor) {
-        // Get row indices for cursor
-        int idx_title = cursor.getColumnIndex(DealsContract.DealEntry.COLUMN_TITLE);
-        int idx_desc = cursor.getColumnIndex(DealsContract.DealEntry.COLUMN_DESC);
-        int idx_date = cursor.getColumnIndex(DealsContract.DealEntry.COLUMN_DATE);
-        int idx_author = cursor.getColumnIndex(DealsContract.DealEntry.COLUMN_AUTHOR);
-        int idx_link = cursor.getColumnIndex(DealsContract.DealEntry.COLUMN_LINK);
-
-//        String highAndLow = formatHighLows(
-//                cursor.getDouble(idx_max_temp),
-//                cursor.getDouble(idx_min_temp));
-
-        return Utility.formatDate(cursor.getLong(idx_date)) + " " +
-                cursor.getString(idx_title) + " - " +
-                cursor.getString(idx_desc) + "-" +
-                cursor.getString(idx_link) + ", by " +
-                cursor.getString(idx_author);
-    }
-
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
@@ -56,7 +37,7 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
     @Override
     public void onBindViewHolder(ViewHolder holder, final Cursor cursor) {
         // Net score
-        holder.netScoreView.setText("XXX");                                 // TODO: Get net score
+        holder.netScoreView.setText(String.valueOf(cursor.getInt(DealListActivity.COL_DEAL_SCORE)));
 
         // Author and category in the format "joe_blow in Pizza"
         Spanned authorCategory = Utility.formatAuthorAndCategory(
@@ -72,8 +53,8 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
         // Time since posted, # comments, time until expired
         String timeCommentsExpiry = Utility.formatTimeCommentsExpiry(
                 cursor.getLong(DealListActivity.COL_DEAL_DATE),
-                123,                                                        // TODO: Get comment count
-                11111111111L                                                // TODO: Get expiry date
+                cursor.getInt(DealListActivity.COL_DEAL_COMMENTS),
+                cursor.getLong(DealListActivity.COL_DEAL_EXPIRY)
         );
         holder.timeCommentsExpiryView.setText(timeCommentsExpiry);
 
