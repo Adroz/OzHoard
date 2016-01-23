@@ -113,6 +113,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
             return null;
         }
         Cursor oldCursor = mCursor;
+        int itemCount = getItemCount();
         mCursor = newCursor;
         if (newCursor != null) {
             mRowIDColumn = newCursor.getColumnIndexOrThrow("_id");
@@ -123,7 +124,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
             mRowIDColumn = -1;
             mDataValid = false;
             // notify the observers about the lack of a data set
-            notifyItemRangeRemoved(0, getItemCount());
+            notifyItemRangeRemoved(0, itemCount);
         }
         return oldCursor;
     }

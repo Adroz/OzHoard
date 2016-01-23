@@ -78,6 +78,7 @@ public class DealListActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         // The CursorAdapter will take data from our cursor and populate the RecyclerView.
         mDealsAdapter = new DealAdapter(this, null);
+        mDealsAdapter.useFooter(true);
 
         setContentView(R.layout.activity_deal_list);
 
