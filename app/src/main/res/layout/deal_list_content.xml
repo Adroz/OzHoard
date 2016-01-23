@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="@dimen/text_margin"
-    android:layout_marginRight="@dimen/text_margin"
+    android:layout_marginEnd="@dimen/small_dividing_margin"
+    android:layout_marginRight="@dimen/small_dividing_margin"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -62,8 +62,9 @@
     <ImageView
         android:id="@+id/deal_image"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:adjustViewBounds="true"
         android:contentDescription="@string/deal_image"
         android:scaleType="fitCenter"
         tools:src="@android:drawable/ic_menu_camera" />
