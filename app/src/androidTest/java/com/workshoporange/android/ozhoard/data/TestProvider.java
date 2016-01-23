@@ -359,6 +359,10 @@ public class TestProvider extends AndroidTestCase {
             dealValues.put(DealEntry.COLUMN_LINK, "blah-blah-blah.com/" + (10 * i));
             dealValues.put(DealEntry.COLUMN_DESC, "Default TEST TEXT");
             dealValues.put(DealEntry.COLUMN_AUTHOR, "Author #" + i);
+            dealValues.put(DealEntry.COLUMN_SCORE, (10 * i + i));
+            dealValues.put(DealEntry.COLUMN_COMMENT_COUNT, (BULK_INSERT_RECORDS_TO_INSERT - i));
+            dealValues.put(DealEntry.COLUMN_EXPIRY, currentTestDate + 500);
+            dealValues.put(DealEntry.COLUMN_IMAGE, TestUtilities.TEST_IMAGE);
             returnContentValues[i] = dealValues;
         }
         return returnContentValues;
@@ -398,7 +402,7 @@ public class TestProvider extends AndroidTestCase {
                 null,
                 null,
                 null,
-                DealEntry.COLUMN_DATE + " DESC"  // sort order == by DATE DESCENDING
+                DealEntry.COLUMN_DATE + " ASC"  // sort order == by DATE ASC
         );
 
         // Should have as many records as we inserted

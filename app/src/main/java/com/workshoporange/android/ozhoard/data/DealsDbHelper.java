@@ -13,7 +13,7 @@ import com.workshoporange.android.ozhoard.data.DealsContract.DealEntry;
 public class DealsDbHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     static final String DATABASE_NAME = "deals.db";
 
@@ -39,6 +39,10 @@ public class DealsDbHelper extends SQLiteOpenHelper {
                 DealEntry.COLUMN_LINK + " TEXT NOT NULL, " +
                 DealEntry.COLUMN_DESC + " TEXT NOT NULL, " +
                 DealEntry.COLUMN_AUTHOR + " TEXT NOT NULL, " +
+                DealEntry.COLUMN_SCORE + " INTEGER NOT NULL, " +
+                DealEntry.COLUMN_COMMENT_COUNT + " INTEGER NOT NULL, " +
+                DealEntry.COLUMN_EXPIRY + " INTEGER NOT NULL, " +
+                DealEntry.COLUMN_IMAGE + " TEXT NOT NULL, " +
 
                 // Set up the category column as a foreign key to category table.
                 " FOREIGN KEY (" + DealEntry.COLUMN_CAT_KEY + ") REFERENCES " +

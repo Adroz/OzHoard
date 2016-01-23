@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.workshoporange.android.ozhoard.data.DealsContract;
 import com.workshoporange.android.ozhoard.utils.Utility;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -90,11 +89,14 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
         // These are the names of the XML tags that need to be extracted.
         final String RSS_ITEM = "item";
         final String RSS_TITLE = "title";
-        final String RSS_LINK = "link";
         final String RSS_DESCRIPTION = "description";
-
         final String OB_DATE = "pubDate";
         final String OB_AUTHOR = "creator";
+        final String RSS_THUMBNAIL = "thumbnail";
+
+        final String OB_META = "meta";
+        final String META_COMMENT_COUNT = "comment-count";
+        final String META_URL = "url";
 
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -106,6 +108,11 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
         ArrayList<String> descriptions = new ArrayList<>();
         ArrayList<Long> dates = new ArrayList<>();
         ArrayList<String> authors = new ArrayList<>();
+        ArrayList<Integer> scores = new ArrayList<>();
+        ArrayList<Integer> comments = new ArrayList<>();
+        ArrayList<Long> expiries = new ArrayList<>();
+        ArrayList<String> imageUrls = new ArrayList<>();
+
         String categoryTitle = "";
 
         int eventType = xpp.getEventType();
@@ -119,9 +126,6 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                     } else {
                         categoryTitle = xpp.nextText();     // Extract page title
                     }
-                } else if (xpp.getName().equalsIgnoreCase(RSS_LINK)) {
-                    if (insideItem)
-                        links.add(xpp.nextText());          // Extract the deal's link
                 } else if (xpp.getName().equalsIgnoreCase(RSS_DESCRIPTION)) {
                     if (insideItem)
                         descriptions.add(xpp.nextText());   // Extract the deal's description
@@ -132,6 +136,16 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                     }
                 } else if (xpp.getName().equalsIgnoreCase(OB_AUTHOR)) {
                     if (insideItem) authors.add(xpp.nextText()); // Extract the author
+                } else if (xpp.getName().equalsIgnoreCase(OB_META)) {
+                    if (insideItem) {
+                        links.add(xpp.getAttributeValue(null, META_URL));// Extract the deal's link
+                        scores.add(getScore(xpp));
+                        comments.add(Integer.parseInt(xpp.getAttributeValue(null, META_COMMENT_COUNT)));
+                        expiries.add(getExpiry(xpp));
+                    }
+                } else if (xpp.getName().equalsIgnoreCase(RSS_THUMBNAIL)) {
+                    if (insideItem)
+                        imageUrls.add(xpp.getAttributeValue(null, META_URL)); // Extract the image URL
                 }
             }
             eventType = xpp.next();
@@ -142,12 +156,16 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
         for (int i = 0; i < headlines.size(); i++) {
             ContentValues dealValues = new ContentValues();
 
-            dealValues.put(DealsContract.DealEntry.COLUMN_CAT_KEY, categoryId);
-            dealValues.put(DealsContract.DealEntry.COLUMN_DATE, dates.get(i));
-            dealValues.put(DealsContract.DealEntry.COLUMN_TITLE, headlines.get(i));
-            dealValues.put(DealsContract.DealEntry.COLUMN_LINK, links.get(i));
-            dealValues.put(DealsContract.DealEntry.COLUMN_DESC, descriptions.get(i));
-            dealValues.put(DealsContract.DealEntry.COLUMN_AUTHOR, authors.get(i));
+            dealValues.put(DealEntry.COLUMN_CAT_KEY, categoryId);
+            dealValues.put(DealEntry.COLUMN_DATE, dates.get(i));
+            dealValues.put(DealEntry.COLUMN_TITLE, headlines.get(i));
+            dealValues.put(DealEntry.COLUMN_LINK, links.get(i));
+            dealValues.put(DealEntry.COLUMN_DESC, descriptions.get(i));
+            dealValues.put(DealEntry.COLUMN_AUTHOR, authors.get(i));
+            dealValues.put(DealEntry.COLUMN_SCORE, scores.get(i));
+            dealValues.put(DealEntry.COLUMN_COMMENT_COUNT, comments.get(i));
+            dealValues.put(DealEntry.COLUMN_EXPIRY, expiries.get(i));
+            dealValues.put(DealEntry.COLUMN_IMAGE, imageUrls.get(i));
 
             cVVector.add(dealValues);
         }
@@ -160,6 +178,32 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
             inserted = mContext.getContentResolver().bulkInsert(DealEntry.CONTENT_URI, cvArray);
         }
         Log.d(LOG_TAG, "FetchDealsTask Complete. " + inserted + " Inserted");
+    }
+
+    private int getScore(XmlPullParser xmlPullParser) {
+        final String META_POSITIVE = "votes-pos";
+        final String META_NEGATIVE = "votes-neg";
+
+        int pos = Integer.parseInt(xmlPullParser.getAttributeValue(null, META_POSITIVE));
+        int neg = Integer.parseInt(xmlPullParser.getAttributeValue(null, META_NEGATIVE));
+        return pos - neg;
+    }
+
+    private long getExpiry(XmlPullParser xmlPullParser) {
+        final String META_EXPIRY = "expiry";
+
+        String expiryString = xmlPullParser.getAttributeValue(null, META_EXPIRY);
+        return (expiryString == null) ? 0L : Utility.formatDateToLong(expiryString, Utility.OB_EXPIRY_DATE_FORMAT);
+    }
+
+    private int getCommentCount(String meta) {
+
+        return 0;
+    }
+
+    private int getUrl(String meta) {
+
+        return 0;
     }
 
     @Override

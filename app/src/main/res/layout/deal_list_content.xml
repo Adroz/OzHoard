@@ -36,6 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/row_margin"
+                android:singleLine="true"
                 tools:ignore="RtlHardcoded"
                 tools:text="Nik.Moores in Electrical &amp; Electronics" />
 

@@ -40,6 +40,7 @@ public class Utility {
     // Format used for storing dates in the database.  Also used for converting those strings
     // back into date objects for comparison/processing.
     public static final String OB_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss ZZZZZ";
+    public static final String OB_EXPIRY_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
 
     public static long formatDateToLong(String time, String dateFormat) {
         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat, Locale.US);
