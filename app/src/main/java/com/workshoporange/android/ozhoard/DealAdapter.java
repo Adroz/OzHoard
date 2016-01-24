@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spanned;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,8 +36,6 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Log.d("TAG", "viewType is TYPE_FOOTER " + (viewType == TYPE_FOOTER));
-        Log.d("TAG", "getBasicItemCount is " + getBasicItemCount());
         if (viewType == TYPE_FOOTER) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.deal_list_footer, parent, false);
@@ -50,8 +47,7 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final Cursor cursor) {
-        Log.d("TAG", "getPosition is " + cursor.getPosition());
+    public void onBindViewHolder(ViewHolder holder, Cursor cursor) {
         if (cursor.getPosition() >= getBasicItemCount() && holder.getItemViewType() == TYPE_FOOTER) {
             ((ViewHolderFooter) holder).progressBar.setIndeterminate(true);
         } else {
@@ -79,16 +75,14 @@ public class DealAdapter extends RecyclerViewCursorAdapter<DealAdapter.ViewHolde
 
             holder.imageView.setImageResource(R.mipmap.ic_launcher);            // TODO: Get real image
 
+            // String categoryPath = Utility.getPreferredLocation(getActivity());
+            final String categoryPath = "deals";          // TODO: Add support for different categories
+            holder.mView.setTag(DealsContract.DealEntry.buildDealCategoryWithLink(categoryPath,
+                    cursor.getString(DealListActivity.COL_DEAL_LINK)));
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // String categoryPath = Utility.getPreferredLocation(getActivity());
-                    final String categoryPath = "deals";          // TODO: Add support for different categories
-                    ((Callback) mContext).onItemSelected(
-                            DealsContract.DealEntry.buildDealCategoryWithLink(
-                                    categoryPath,
-                                    cursor.getString(DealListActivity.COL_DEAL_LINK))
-                    );
+                    ((Callback) mContext).onItemSelected((Uri) v.getTag());
                 }
             });
         }
