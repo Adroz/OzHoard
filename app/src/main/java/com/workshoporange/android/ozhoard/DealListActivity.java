@@ -76,10 +76,6 @@ public class DealListActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // The CursorAdapter will take data from our cursor and populate the RecyclerView.
-        mDealsAdapter = new DealAdapter(this, null);
-        mDealsAdapter.useFooter(true);
-
         setContentView(R.layout.activity_deal_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -98,7 +94,9 @@ public class DealListActivity extends AppCompatActivity
         assert mSwipeRefreshLayout != null;
         setupSwipeRefreshLayout(mSwipeRefreshLayout);
 
+        // The CursorAdapter will take data from the cursor and populate the RecyclerView.
         mRecyclerView = (RecyclerView) findViewById(R.id.deal_list);
+        mDealsAdapter = new DealAdapter(this, null, mRecyclerView);
         assert mRecyclerView != null;
         setupRecyclerView(mRecyclerView);
 
@@ -120,17 +118,22 @@ public class DealListActivity extends AppCompatActivity
             }
         }
         getSupportLoaderManager().initLoader(DEALS_LOADER, null, this);
-        updateDeals();
     }
 
     private void onChangeCategory() {
-        updateDeals();
+        refreshDeals();
         getSupportLoaderManager().restartLoader(DEALS_LOADER, null, this);
     }
 
-    private void updateDeals() {
+    /**
+     * Clears the adapter's scroll values (so that the adapter's scroll page count is 0) and the
+     * current database table, then requests new data via {@link FetchDealsTask}.
+     */
+    private void refreshDeals() {
+        mDealsAdapter.resetItems();
         // String categoryPath = Utility.getPreferredCategory(getActivity());
         String categoryPath = "deals";  // TODO: Get real path
+        this.getContentResolver().delete(DealsContract.DealEntry.CONTENT_URI, null, null);
         FetchDealsTask dealsTask = new FetchDealsTask(getApplicationContext());
         dealsTask.execute(categoryPath);
     }
@@ -142,10 +145,20 @@ public class DealListActivity extends AppCompatActivity
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        updateDeals();
+                        refreshDeals();
                     }
                 }
         );
+        // Set to refresh list if nothing is currently being displayed.
+        swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                if ((mDealsAdapter.getItemCount() == 0) && !mSwipeRefreshLayout.isRefreshing()) {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                    refreshDeals();
+                }
+            }
+        });
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -170,7 +183,7 @@ public class DealListActivity extends AppCompatActivity
         if (id == R.id.action_refresh) {
             // Signal SwipeRefreshLayout to start the progress indicator
             mSwipeRefreshLayout.setRefreshing(true);
-            updateDeals();
+            refreshDeals();
             return true;
         }
 
@@ -199,6 +212,18 @@ public class DealListActivity extends AppCompatActivity
     }
 
     @Override
+    public void onLoadMore(int pageCount) {
+        // Don't load more if trying to refresh
+        if (mSwipeRefreshLayout.isRefreshing()) return;
+
+        // Fetch next page
+        // String categoryPath = Utility.getPreferredCategory(getActivity());
+        String categoryPath = "deals";  // TODO: Get real path
+        FetchDealsTask dealsTask = new FetchDealsTask(getApplicationContext());
+        dealsTask.execute(categoryPath, String.valueOf(pageCount));
+    }
+
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 //        String categoryPath = Utility.getPreferredCategory(getActivity());
         String categoryPath = "deals";  // TODO: Get real path
@@ -217,14 +242,21 @@ public class DealListActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mDealsAdapter.swapCursor(data);
-        if (mPosition != ListView.INVALID_POSITION) {
-            // If we don't need to restart the loader, and there's a desired position to restore
-            // to, do so now.
-            mRecyclerView.smoothScrollToPosition(mPosition);
+        // Set swipe refresh to refreshing if there is no data (as a visual cue).
+        if (!mSwipeRefreshLayout.isRefreshing() && !data.moveToFirst()) {
+            mSwipeRefreshLayout.setRefreshing(true);
+            refreshDeals();
+        } else {
+            mDealsAdapter.swapCursor(data);
+            if (mPosition != ListView.INVALID_POSITION) {
+                // If we don't need to restart the loader, and there's a desired position to restore
+                // to, do so now.
+                mRecyclerView.smoothScrollToPosition(mPosition);
+            }
+            // Call this to stop the refreshing indicator as the refresh is complete.
+            mSwipeRefreshLayout.setRefreshing(false);
+            mDealsAdapter.setLoading(false);
         }
-        // Call this to stop the refreshing indicator as the refresh is complete.
-        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
