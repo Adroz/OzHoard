@@ -4,4 +4,5 @@
     <string name="deal_image">deal image</string>
     <string name="action_refresh">Refresh</string>
     <string name="ozbargain_base_url">https://www.ozbargain.com.au/</string>
+    <string name="adapter_position">adapter_position</string>
 </resources>

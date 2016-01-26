@@ -14,6 +14,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,12 +33,17 @@ import com.workshoporange.android.ozhoard.data.DealsContract;
 public class DealListActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor>, DealAdapter.Callback {
 
-    private final String DETAILFRAGMENT_TAG = "DFTAG";
+    private final String LOG_TAG = DealListActivity.class.getSimpleName();
+
+    private final String DETAIL_FRAGMENT_TAG = "DFTAG";
+    private static final String SELECTED_KEY = "selected_position";
+    private static final String PAGE_KEY = "page_count";
     private boolean mTwoPane = false;
     private DealAdapter mDealsAdapter;
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private int mPosition = ListView.INVALID_POSITION;
+    private static int mPosition = ListView.INVALID_POSITION;
+    private static int mPageCount = 0;
 
     private static final int DEALS_LOADER = 0;
     // Only create a projection of the columns we need.
@@ -113,11 +119,19 @@ public class DealListActivity extends AppCompatActivity
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.deal_detail_container,
                                 new DealDetailFragment(),
-                                DETAILFRAGMENT_TAG)
+                                DETAIL_FRAGMENT_TAG)
                         .commit();
             }
         }
+        // If there's instance state, mine it for useful information.
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            // The ListView probably hasn't even been populated yet.  Actually perform the
+            // swap-out in onLoadFinished.
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+            mPageCount = savedInstanceState.getInt(PAGE_KEY);
+        }
         getSupportLoaderManager().initLoader(DEALS_LOADER, null, this);
+        refreshDeals();                                                                             // ALWAYS refresh on startup
     }
 
     private void onChangeCategory() {
@@ -130,6 +144,8 @@ public class DealListActivity extends AppCompatActivity
      * current database table, then requests new data via {@link FetchDealsTask}.
      */
     private void refreshDeals() {
+        mPageCount = 0;
+        mPosition = -1;
         mDealsAdapter.resetItems();
         // String categoryPath = Utility.getPreferredCategory(getActivity());
         String categoryPath = "deals";  // TODO: Get real path
@@ -149,20 +165,23 @@ public class DealListActivity extends AppCompatActivity
                     }
                 }
         );
-        // Set to refresh list if nothing is currently being displayed.
-        swipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                if ((mDealsAdapter.getItemCount() == 0) && !mSwipeRefreshLayout.isRefreshing()) {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                    refreshDeals();
-                }
-            }
-        });
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setAdapter(mDealsAdapter);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Log.d(LOG_TAG, "onSaveInstanceState called, mPosition = " + mPosition + ", mPageCount = " + mPageCount);
+        // When tablets rotate, the currently selected list item needs to be saved.
+        // When no item is selected, mPosition will be set to ListView.INVALID_POSITION,
+        // so check for that before storing.
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
+        outState.putInt(PAGE_KEY, mPageCount);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -191,7 +210,8 @@ public class DealListActivity extends AppCompatActivity
     }
 
     @Override
-    public void onItemSelected(Uri contentUri) {
+    public void onItemSelected(Uri contentUri, int position) {
+        mPosition = position;
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
@@ -201,7 +221,7 @@ public class DealListActivity extends AppCompatActivity
             DealDetailFragment fragment = new DealDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.deal_detail_container, fragment, DETAILFRAGMENT_TAG)
+                    .replace(R.id.deal_detail_container, fragment, DETAIL_FRAGMENT_TAG)
                     .commit();
         } else {
             Intent intent = new Intent(this, DealDetailActivity.class);
@@ -215,6 +235,9 @@ public class DealListActivity extends AppCompatActivity
     public void onLoadMore(int pageCount) {
         // Don't load more if trying to refresh
         if (mSwipeRefreshLayout.isRefreshing()) return;
+
+        mPosition = -1;
+        mPageCount = pageCount;
 
         // Fetch next page
         // String categoryPath = Utility.getPreferredCategory(getActivity());
@@ -243,20 +266,14 @@ public class DealListActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // Set swipe refresh to refreshing if there is no data (as a visual cue).
-        if (!mSwipeRefreshLayout.isRefreshing() && !data.moveToFirst()) {
-            mSwipeRefreshLayout.setRefreshing(true);
-            refreshDeals();
-        } else {
-            mDealsAdapter.swapCursor(data);
-            if (mPosition != ListView.INVALID_POSITION) {
-                // If we don't need to restart the loader, and there's a desired position to restore
-                // to, do so now.
-                mRecyclerView.smoothScrollToPosition(mPosition);
-            }
-            // Call this to stop the refreshing indicator as the refresh is complete.
-            mSwipeRefreshLayout.setRefreshing(false);
-            mDealsAdapter.setLoading(false);
+        mDealsAdapter.swapCursor(data);
+        if (mPosition != ListView.INVALID_POSITION) {
+            // If we don't need to restart the loader, and there's a desired position to restore
+            // to, do so now.
+            mRecyclerView.scrollToPosition(mPosition);
         }
+        // Call this to stop the refreshing indicator as the refresh is complete.
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

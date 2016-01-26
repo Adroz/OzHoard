@@ -76,10 +76,12 @@ public class DealAdapter extends LoadingScrollRecyclerViewCursorAdapter<DealAdap
         final String categoryPath = "deals";          // TODO: Add support for different categories
         holder.mView.setTag(DealsContract.DealEntry.buildDealCategoryWithLink(categoryPath,
                 cursor.getString(DealListActivity.COL_DEAL_LINK)));
+        holder.mView.setTag(R.string.adapter_position, holder.getAdapterPosition());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((Callback) mContext).onItemSelected((Uri) v.getTag());
+                ((Callback) mContext).onItemSelected((Uri) v.getTag(),
+                        (int) v.getTag(R.string.adapter_position));
             }
         });
     }
@@ -103,7 +105,7 @@ public class DealAdapter extends LoadingScrollRecyclerViewCursorAdapter<DealAdap
         /**
          * DealDetailFragmentCallback for when an item has been selected.
          */
-        void onItemSelected(Uri dateUri);
+        void onItemSelected(Uri dateUri, int position);
 
         /**
          * Triggered when the base adapter detects the RecyclerView is approaching the end of its
