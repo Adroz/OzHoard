@@ -102,7 +102,7 @@ public class DealsContract {
         // Column with the foreign key into the category table.
         public static final String COLUMN_CAT_KEY = "category_id";
 
-        // Date and time, stored as a human readable String
+        // Date and time, in milliseconds (long)
         public static final String COLUMN_DATE = "date";
         // Title (String)
         public static final String COLUMN_TITLE = "title";
@@ -112,5 +112,13 @@ public class DealsContract {
         public static final String COLUMN_DESC = "description";
         // Author (String)
         public static final String COLUMN_AUTHOR = "author";
+        // Net score: positive-negative scores (int)
+        public static final String COLUMN_SCORE = "score";
+        // Comment count (int)
+        public static final String COLUMN_COMMENT_COUNT = "comment_count";
+        // Expiry date and time, in milliseconds (long)
+        public static final String COLUMN_EXPIRY = "expiry";
+        // Image URL (String)
+        public static final String COLUMN_IMAGE = "image";
     }
 }

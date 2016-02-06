@@ -1,23 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/small_dividing_margin"
+    android:layout_marginRight="@dimen/small_dividing_margin"
     android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/id"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
-        tools:text="001" />
+        android:layout_marginBottom="@dimen/row_margin"
+        android:layout_marginEnd="@dimen/small_dividing_margin"
+        android:layout_marginLeft="@dimen/text_margin"
+        android:layout_marginRight="@dimen/small_dividing_margin"
+        android:layout_marginStart="@dimen/text_margin"
+        android:layout_marginTop="@dimen/row_margin"
+        android:layout_weight="5"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem"
-        tools:text="Extreme Deal!! - 110% off everything!!!" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/net_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                tools:text="110" />
+
+            <TextView
+                android:id="@+id/author_and_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/row_margin"
+                android:singleLine="true"
+                tools:ignore="RtlHardcoded"
+                tools:text="Nik.Moores in Electrical &amp; Electronics" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/deal_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="false"
+            android:textAppearance="?attr/textAppearanceListItem"
+            tools:text="Extreme Deal!! - 110% off everything!!!" />
+
+        <TextView
+            android:id="@+id/time_comments_expiry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            tools:text="2hrs ago - 12 comments - expires in 2 days" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/deal_image"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:layout_weight="1"
+        android:adjustViewBounds="true"
+        android:layout_marginTop="@dimen/row_margin"
+        android:layout_marginBottom="@dimen/row_margin"
+        android:contentDescription="@string/deal_image"
+        android:scaleType="fitCenter"
+        tools:src="@android:drawable/ic_menu_camera" />
+
 </LinearLayout>

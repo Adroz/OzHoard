@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="time_in_minutes">
+        <item quantity="one">%dmin</item>
+        <item quantity="other">%dmins</item>
+    </plurals>
+    <plurals name="time_in_hours">
+        <item quantity="one">%dhr</item>
+        <item quantity="other">%dhrs</item>
+    </plurals>
+    <plurals name="time_in_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="time_in_weeks">
+        <item quantity="one">%d week</item>
+        <item quantity="other">%d weeks</item>
+    </plurals>
+    <plurals name="time_in_months">
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
+    </plurals>
+    <plurals name="number_of_comments">
+        <item quantity="one">%d comment</item>
+        <item quantity="other">%d comments</item>
+    </plurals>
+</resources>

@@ -3,4 +3,8 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="expiryColour">#D32F2F</color>
+    <color name="nearlyExpiredColour">#E64A19</color>
+    <color name="notExpiredColour">#388E3C</color>
 </resources>

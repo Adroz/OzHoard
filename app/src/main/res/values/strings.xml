@@ -1,4 +1,28 @@
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">Oz Hoard</string>
     <string name="title_deal_detail">Deal Detail</string>
+    <string name="deal_image">deal image</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="ozbargain_base_url">https://www.ozbargain.com.au/</string>
+    <string name="adapter_position">adapter_position</string>
+
+    <!-- Strings for formatting deal-related data -->
+    <!-- Time-comments-expiry format -->
+    <string name="format_time_comments_expiry">
+        <xliff:g example="23" id="time">%1$s</xliff:g> \u2022
+        <xliff:g example="11" id="comments">%2$s</xliff:g> \u2022
+        <xliff:g example="1" id="expiry">%3$s</xliff:g></string>
+
+    <string name="format_time_comments">
+        <xliff:g example="23 minutes ago" id="time">%1$s</xliff:g> \u2022
+        <xliff:g example="11 " id="comments">%2$s</xliff:g>
+    </string>
+
+    <string name="expires">Expires\u0020</string>
+    <string name="expired">Expired\u0020</string>
+
+    <!-- Time format [CHAR LIMIT=5 -->
+    <string name="format_time"><xliff:g example="days" id="time">%1.0f</xliff:g>\u00B0</string>
+    <!-- Temperature format [CHAR LIMIT=5 -->
+    <string name="format_temperature"><xliff:g id="temp">%1.0f</xliff:g>\u00B0</string>
 </resources>

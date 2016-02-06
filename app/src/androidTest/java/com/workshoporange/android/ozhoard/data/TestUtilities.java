@@ -20,6 +20,7 @@ public class TestUtilities extends AndroidTestCase {
     static final String TEST_CATEGORY = "gaming";
     static final long TEST_DATE = 1419033600L;  // December 20th, 2014
     static final String TEST_LINK = "https://www.ozbargain.com.au/node/231025";
+    static final String TEST_IMAGE = "http://img1.123freevectors.com/wp-content/uploads/new/icon/075-smiley-face-vector-art-free-download-l.png";
 
     static void validateCursor(String error, Cursor valueCursor, ContentValues expectedValues) {
         assertTrue("Empty cursor returned. " + error, valueCursor.moveToFirst());
@@ -51,6 +52,10 @@ public class TestUtilities extends AndroidTestCase {
         dealValues.put(DealsContract.DealEntry.COLUMN_LINK, TEST_LINK);
         dealValues.put(DealsContract.DealEntry.COLUMN_DESC, "Boy have I got some deals for you!");
         dealValues.put(DealsContract.DealEntry.COLUMN_AUTHOR, "Nik Moores");
+        dealValues.put(DealsContract.DealEntry.COLUMN_SCORE, 110);
+        dealValues.put(DealsContract.DealEntry.COLUMN_COMMENT_COUNT, 23);
+        dealValues.put(DealsContract.DealEntry.COLUMN_EXPIRY, TEST_DATE + 500);
+        dealValues.put(DealsContract.DealEntry.COLUMN_IMAGE, TEST_IMAGE);
 
         return dealValues;
     }

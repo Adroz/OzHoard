@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.workshoporange.android.ozhoard.data.DealsContract;
 import com.workshoporange.android.ozhoard.utils.Utility;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -22,7 +21,6 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Vector;
 
 import static com.workshoporange.android.ozhoard.data.DealsContract.CategoryEntry;
@@ -32,13 +30,24 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
 
     private final String LOG_TAG = FetchDealsTask.class.getSimpleName();
 
+    private static final int DEALS_PER_PAGE = 10;
+
     private final Context mContext;
+
+    private static String categoryTitle = "";
+    private static String headline = "";
+    private static String link = "";
+    private static String description = "";
+    private static long date = 0L;
+    private static String author = "";
+    private static int score = 0;
+    private static int comment = 0;
+    private static long expiry = 0L;
+    private static String imageUrl = "";
 
     public FetchDealsTask(Context context) {
         mContext = context;
     }
-
-    private boolean DEBUG = true;
 
     /**
      * Helper method to handle insertion of a new category in the deal database.
@@ -74,8 +83,13 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
     }
 
     /**
-     * Take the String representing the complete deal list in XML Format and
-     * pull out the data we need to construct the Strings needed for the wireframes.
+     * Take the String representing the complete deal list in XML Format and pull out the data we
+     * need to construct the ContentValues needed for the wireframes.
+     *
+     * @param feedXmlStr   The XML feed, as a string
+     * @param categoryPath The category path in which to put the data
+     * @throws XmlPullParserException
+     * @throws IOException
      */
     private void getDealsDataFromRss(String feedXmlStr, String categoryPath)
             throws XmlPullParserException, IOException {
@@ -90,66 +104,78 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
         // These are the names of the XML tags that need to be extracted.
         final String RSS_ITEM = "item";
         final String RSS_TITLE = "title";
-        final String RSS_LINK = "link";
         final String RSS_DESCRIPTION = "description";
-
         final String OB_DATE = "pubDate";
         final String OB_AUTHOR = "creator";
+        final String RSS_THUMBNAIL = "thumbnail";
+
+        final String OB_META = "meta";
+        final String META_COMMENT_COUNT = "comment-count";
+        final String META_URL = "url";
 
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         factory.setNamespaceAware(true);
         XmlPullParser xpp = factory.newPullParser();
         xpp.setInput(new StringReader(feedXmlStr));
 
-        ArrayList<String> headlines = new ArrayList<>();
-        ArrayList<String> links = new ArrayList<>();
-        ArrayList<String> descriptions = new ArrayList<>();
-        ArrayList<Long> dates = new ArrayList<>();
-        ArrayList<String> authors = new ArrayList<>();
-        String categoryTitle = "";
+        // Add category (if new) and create ContentValues vector to store each deal's data.
+        long categoryId = addCategory(categoryPath, categoryTitle);
+        Vector<ContentValues> cVVector = new Vector<>(DEALS_PER_PAGE);
 
         int eventType = xpp.getEventType();
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG) {
                 if (xpp.getName().equalsIgnoreCase(RSS_ITEM)) {
+                    // Once we've passed into them main channel's items we can start storing data.
                     insideItem = true;
+                    resetRssVariables();
                 } else if (xpp.getName().equalsIgnoreCase(RSS_TITLE)) {
                     if (insideItem) {
-                        headlines.add(xpp.nextText());      // Extract the headline
+                        headline = xpp.nextText();      // Extract the headline
                     } else {
-                        categoryTitle = xpp.nextText();     // Extract page title
+                        categoryTitle = xpp.nextText(); // Extract page title
                     }
-                } else if (xpp.getName().equalsIgnoreCase(RSS_LINK)) {
-                    if (insideItem)
-                        links.add(xpp.nextText());          // Extract the deal's link
                 } else if (xpp.getName().equalsIgnoreCase(RSS_DESCRIPTION)) {
-                    if (insideItem)
-                        descriptions.add(xpp.nextText());   // Extract the deal's description
-                } else if (xpp.getName().equalsIgnoreCase(OB_DATE)) {
                     if (insideItem) {
-                        long date = Utility.formatDateToLong(xpp.nextText(), Utility.OB_DATE_FORMAT);
-                        dates.add(date);                    // Extract the posting date
+                        description = xpp.nextText();   // Extract the deal's description
                     }
+                } else if (xpp.getName().equalsIgnoreCase(OB_DATE)) {
+                    if (insideItem)                     // Extract the posting date
+                        date = Utility.formatDateToMillis(xpp.nextText(), Utility.OB_DATE_FORMAT);
                 } else if (xpp.getName().equalsIgnoreCase(OB_AUTHOR)) {
-                    if (insideItem) authors.add(xpp.nextText()); // Extract the author
+                    if (insideItem)
+                        author = xpp.nextText();        // Extract the author
+                } else if (xpp.getName().equalsIgnoreCase(OB_META)) {
+                    if (insideItem) {
+                        link = xpp.getAttributeValue(null, META_URL);// Extract the deal's link
+                        score = getScore(xpp);          // Extract vote score (pos-neg)
+                        comment = Integer.parseInt(xpp.getAttributeValue(null, META_COMMENT_COUNT));
+                        expiry = getExpiry(xpp);        // Extract expiry, if any
+                    }
+                } else if (xpp.getName().equalsIgnoreCase(RSS_THUMBNAIL)) {
+                    if (insideItem)                     // Extract the image URL
+                        imageUrl = getStringFromParser(xpp.getAttributeValue(null, META_URL));
                 }
+            } else if (eventType == XmlPullParser.END_TAG &&
+                    xpp.getName().equalsIgnoreCase(RSS_ITEM)) {
+                // Now that we're finished with one deal, store the data, then continue to the next
+                insideItem = false;
+
+                ContentValues dealValues = new ContentValues();
+                dealValues.put(DealEntry.COLUMN_CAT_KEY, categoryId);
+                dealValues.put(DealEntry.COLUMN_DATE, date);
+                dealValues.put(DealEntry.COLUMN_TITLE, headline);
+                dealValues.put(DealEntry.COLUMN_LINK, link);
+                dealValues.put(DealEntry.COLUMN_DESC, description);
+                dealValues.put(DealEntry.COLUMN_AUTHOR, author);
+                dealValues.put(DealEntry.COLUMN_SCORE, score);
+                dealValues.put(DealEntry.COLUMN_COMMENT_COUNT, comment);
+                dealValues.put(DealEntry.COLUMN_EXPIRY, expiry);
+                dealValues.put(DealEntry.COLUMN_IMAGE, imageUrl);
+
+                cVVector.add(dealValues);
             }
             eventType = xpp.next();
-        }
-        long categoryId = addCategory(categoryPath, categoryTitle);
-        Vector<ContentValues> cVVector = new Vector<>(headlines.size());
-
-        for (int i = 0; i < headlines.size(); i++) {
-            ContentValues dealValues = new ContentValues();
-
-            dealValues.put(DealsContract.DealEntry.COLUMN_CAT_KEY, categoryId);
-            dealValues.put(DealsContract.DealEntry.COLUMN_DATE, dates.get(i));
-            dealValues.put(DealsContract.DealEntry.COLUMN_TITLE, headlines.get(i));
-            dealValues.put(DealsContract.DealEntry.COLUMN_LINK, links.get(i));
-            dealValues.put(DealsContract.DealEntry.COLUMN_DESC, descriptions.get(i));
-            dealValues.put(DealsContract.DealEntry.COLUMN_AUTHOR, authors.get(i));
-
-            cVVector.add(dealValues);
         }
 
         int inserted = 0;
@@ -162,12 +188,57 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
         Log.d(LOG_TAG, "FetchDealsTask Complete. " + inserted + " Inserted");
     }
 
+    private void resetRssVariables() {
+        categoryTitle = "";
+        headline = "";
+        link = "";
+        description = "";
+        date = 0L;
+        author = "";
+        score = 0;
+        comment = 0;
+        expiry = 0L;
+        imageUrl = "";
+    }
+
+    private int getScore(XmlPullParser xmlPullParser) {
+        final String META_POSITIVE = "votes-pos";
+        final String META_NEGATIVE = "votes-neg";
+
+        int pos = Integer.parseInt(xmlPullParser.getAttributeValue(null, META_POSITIVE));
+        int neg = Integer.parseInt(xmlPullParser.getAttributeValue(null, META_NEGATIVE));
+        return pos - neg;
+    }
+
+    private long getExpiry(XmlPullParser xmlPullParser) {
+        final String META_EXPIRY = "expiry";
+
+        String expiryString = xmlPullParser.getAttributeValue(null, META_EXPIRY);
+        return (expiryString == null) ?
+                0L : Utility.formatDateToMillis(expiryString, Utility.OB_EXPIRY_DATE_FORMAT);
+    }
+
+    /**
+     * Simple method that passes through any non <code>null</code> string and converts a
+     * <code>null</code> string to an empty ("") one.
+     *
+     * @param parsedString The string to pass through
+     * @return The original string or an empty string if the original was <code>null</code>.
+     */
+    private String getStringFromParser(String parsedString) {
+        return (parsedString == null) ? "" : parsedString;
+    }
+
     @Override
     protected Void doInBackground(String... params) {
-        // If there's no category, then set to default.  Verify size of params.
-        if (params.length == 0) {
-            Log.v(LOG_TAG, "No category input, using default.");
-            params = new String[]{"deals"};
+        if (params.length > 1) {
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                Integer.parseInt(params[1]);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                params[1] = "0";
+            }
         }
 
         // These two need to be declared outside the try/catch
@@ -180,17 +251,16 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
 
         try {
             // Construct the URL for OzBargain's feed.
-            final String OZBARGAIN_BASE_URL = "https://www.ozbargain.com.au/";
-//            final String OZBARGAIN_CATEGORY_URL = "cat";
+            final String OZBARGAIN_BASE_URL = mContext.getString(R.string.ozbargain_base_url);
 
-            Uri builtUri = Uri.parse(OZBARGAIN_BASE_URL).buildUpon()
-                    .appendPath(params[0])
-                    .appendPath("feed")
-                    .build();
+            Uri.Builder builder = Uri.parse(OZBARGAIN_BASE_URL).buildUpon();
+            if (params.length > 0) builder.appendPath(params[0]);           // If not the front page
+            builder.appendPath("feed");
+            if (params.length > 1)
+                builder.appendQueryParameter("page", params[1]);   // If not page 0, query.
 
-            URL url = new URL(builtUri.toString());
-
-            Log.v(LOG_TAG, "Constructed URI " + builtUri.toString());
+            URL url = new URL(builder.build().toString());
+            Log.v(LOG_TAG, "Constructed URI " + builder.build().toString());
 
             // Create the request to OzBargain, and open the connection
             urlConnection = (HttpURLConnection) url.openConnection();
@@ -219,7 +289,7 @@ public class FetchDealsTask extends AsyncTask<String, Void, Void> {
                 return null;
             }
             feedXmlStr = buffer.toString();
-            getDealsDataFromRss(feedXmlStr, params[0]);
+            getDealsDataFromRss(feedXmlStr, params[0]);         // TODO: Catch possible empty params when supporting multiple types
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the deal data, there's no point in attempting
