@@ -64,6 +64,7 @@ public class DealAdapter extends LoadingScrollRecyclerViewCursorAdapter<DealAdap
 
         // Time since posted, # comments, time until expired
         String timeCommentsExpiry = Utility.formatTimeCommentsExpiry(
+                mContext,
                 cursor.getLong(DealListActivity.COL_DEAL_DATE),
                 cursor.getInt(DealListActivity.COL_DEAL_COMMENTS),
                 cursor.getLong(DealListActivity.COL_DEAL_EXPIRY)

@@ -1,6 +1,7 @@
 package com.workshoporange.android.ozhoard.utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.text.Spanned;
@@ -19,6 +20,8 @@ import java.util.TimeZone;
  */
 public class Utility {
 
+    private static final String LOG_TAG = Utility.class.getSimpleName();
+
     public static Spanned formatAuthorAndCategory(Context context, String author, String category) {
         String themeColor = String.format("#%06X",
                 (0xFFFFFF & ContextCompat.getColor(context, R.color.colorPrimaryDark)));
@@ -27,29 +30,31 @@ public class Utility {
                 "<font color=\"" + themeColor + "\">" + category + "</font>");
     }
 
-    public static String formatTimeCommentsExpiry(long postTime, int comments, long expiry) {
-        StringBuilder stringBuilder = new StringBuilder();
+    public static String formatTimeCommentsExpiry(Context context, long postTime, int comments, long expiry) {
+        Resources resources = context.getResources();
 
-        // Time since posted
-        String postTimeString = getFriendlyTime(postTime);
-        stringBuilder.append(postTimeString);
-        if (!postTimeString.contains("/")) stringBuilder.append(" ago");
+        // Time since posted string
+        String postTimeString = getFriendlyTime(context, postTime);
 
         // Number of comments
-        stringBuilder.append(" \u2022 ");
-        String commentString = (comments == 1) ? "1 comment" : comments + " comments";
-        stringBuilder.append(commentString);
+        String commentString = resources.getQuantityString(R.plurals.number_of_comments, comments, comments);
 
-        // Time until expiry
-        if (expiry != 0L) {
-            stringBuilder.append(" \u2022 ");
-            String expiryString = getFriendlyTime(expiry);
-            stringBuilder.append("expires ");
-            if (!postTimeString.contains("/")) stringBuilder.append("in ");
-            stringBuilder.append(expiryString);
-        }
+        // If no expiry, use short format
+        if (expiry == 0L)
+            return resources.getString(R.string.format_time_comments, postTimeString, commentString);
 
-        return stringBuilder.toString();
+        // Else format with Expiry
+        int expiryTenseRes = (System.currentTimeMillis() > expiry) ? R.string.expired : R.string.expires;
+        String expiryString = resources.getString(expiryTenseRes) + getFriendlyTime(context, expiry);
+
+        return resources.getString(R.string.format_time_comments_expiry,
+                postTimeString, commentString, expiryString);
+    }
+
+    private Spanned setStringColour(Context context, String string, int colourResource) {
+        String stringColour = String.format("#%06X",
+                (0xFFFFFF & ContextCompat.getColor(context, colourResource)));
+        return Html.fromHtml("<font color=\"" + stringColour + "\">" + string + "</font>");
     }
 
     // Format used for storing dates in the database.  Also used for converting those strings
@@ -82,7 +87,7 @@ public class Utility {
      * @param dateInMillis The date in milliseconds
      * @return A user-friendly representation of the date.
      */
-    public static String getFriendlyTime(long dateInMillis) {
+    public static String getFriendlyTime(Context context, long dateInMillis) {
         // Return string is in the format:
         // Less than 1hr: "12min ago" or "in 12min"
         // Same day: "6hrs ago" or "in 6hrs"
@@ -90,54 +95,63 @@ public class Utility {
         // Less than 2 months: "6 weeks ago" or "in 6 weeks"
         // More than 2 months: "23/01/2016"
         long currentTime = System.currentTimeMillis();
+        Resources resources = context.getResources();
         String differenceString;
 
-        long timeDifference[] = getDateDifference(currentTime, dateInMillis);
-        if (timeDifference[0] < 60) {
+        LengthOfTime timeDifference = new LengthOfTime(currentTime, dateInMillis);
+        if (timeDifference.hours == 0) {
             // Less than 1 hour
-            String minString = (timeDifference[0] == 1) ? "min" : "mins";
-            differenceString = timeDifference[0] + minString;
-        } else if (timeDifference[1] < 24) {
+            differenceString = resources.getQuantityString(R.plurals.time_in_minutes,
+                    (int) timeDifference.minutes, (int) timeDifference.minutes);
+        } else if (timeDifference.days == 0) {
             // Less than 1 day
-            String hrString = (timeDifference[1] == 1) ? "hr" : "hrs";
-            differenceString = timeDifference[1] + hrString;
-        } else if (timeDifference[2] < 7) {
+            differenceString = resources.getQuantityString(R.plurals.time_in_hours,
+                    (int) timeDifference.hours, (int) timeDifference.hours);
+        } else if (timeDifference.weeks == 0) {
             // Less than 1 week
-            String dayString = (timeDifference[2] == 1) ? " day" : " days";
-            differenceString = timeDifference[2] + dayString;
-        } else if (timeDifference[3] < 4) {
-            // Less than 4 weeks
-            String weekString = (timeDifference[3] == 1) ? " week" : " weeks";
-            differenceString = timeDifference[3] + weekString;
-        } else if (timeDifference[3] < 12) {
-            // Less than 3 months
-            int monthDifference = getMonthDifference(currentTime, dateInMillis);
-            String monthString = (monthDifference == 1) ? " month" : " months";
-            differenceString = monthString + monthString;
+            differenceString = resources.getQuantityString(R.plurals.time_in_days,
+                    (int) timeDifference.days, (int) timeDifference.days);
+        } else if (timeDifference.months == 0) {
+            // Less than a month
+            differenceString = resources.getQuantityString(R.plurals.time_in_weeks,
+                    (int) timeDifference.weeks, (int) timeDifference.weeks);
+        } else if (timeDifference.months < 4) {
+            // Less than 4 months
+            differenceString = resources.getQuantityString(R.plurals.time_in_months,
+                    (int) timeDifference.months, (int) timeDifference.months);
         } else {
             Date date = new Date(dateInMillis);
             SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy", Locale.US);
-            differenceString = df.format(date);
+            return df.format(date);
         }
-        return differenceString;
+
+        String returnString;
+        if (currentTime > dateInMillis) {
+            returnString = (differenceString.contains("/")) ? differenceString : differenceString + " ago";
+        } else {
+            returnString = (differenceString.contains("/")) ? differenceString : "in " + differenceString;
+        }
+        return returnString;
     }
 
     /**
-     * Gets the minute, hour, day and week difference between two dates.
-     *
-     * @param dateInMillis1 The first date to compare, in milliseconds
-     * @param dateInMillis2 The second date to compare, in milliseconds
-     * @return An array of all four time differences
+     * Formats the minute, hour, day and week difference between two dates.
      */
-    public static long[] getDateDifference(long dateInMillis1, long dateInMillis2) {
-        long diff = Math.abs(dateInMillis1 - dateInMillis2);
-        long difference[] = new long[4];
-        difference[0] = diff / (60 * 1000);
-        difference[1] = diff / (60 * 60 * 1000);
-        difference[2] = diff / (24 * 60 * 60 * 1000);
-        difference[3] = diff / (7 * 24 * 60 * 60 * 1000);
+    public static class LengthOfTime {
+        public long minutes;
+        public long hours;
+        public long days;
+        public long weeks;
+        public long months;
 
-        return difference;
+        public LengthOfTime(long dateInMillis1, long dateInMillis2) {
+            long diff = Math.abs(dateInMillis1 - dateInMillis2);
+            minutes = diff / (60 * 1000);
+            hours = diff / (60 * 60 * 1000);
+            days = diff / (24 * 60 * 60 * 1000);
+            weeks = diff / (7 * 24 * 60 * 60 * 1000);
+            months = getMonthDifference(dateInMillis1, dateInMillis2);
+        }
     }
 
     /**
