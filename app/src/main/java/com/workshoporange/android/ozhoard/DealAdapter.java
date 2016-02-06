@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.workshoporange.android.ozhoard.data.DealsContract;
 import com.workshoporange.android.ozhoard.utils.Utility;
 
@@ -71,7 +72,8 @@ public class DealAdapter extends LoadingScrollRecyclerViewCursorAdapter<DealAdap
         );
         holder.timeCommentsExpiryView.setText(timeCommentsExpiry);
 
-        holder.imageView.setImageResource(R.mipmap.ic_launcher);            // TODO: Get real image
+        String imageUrl = cursor.getString(DealListActivity.COL_DEAL_IMAGE);
+        Picasso.with(holder.imageView.getContext()).load(imageUrl).into(holder.imageView);
 
         // String categoryPath = Utility.getPreferredLocation(getActivity());
         final String categoryPath = "deals";          // TODO: Add support for different categories
