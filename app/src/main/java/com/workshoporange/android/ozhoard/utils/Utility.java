@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.SpannedString;
 
 import com.workshoporange.android.ozhoard.R;
 
@@ -30,7 +31,7 @@ public class Utility {
                 "<font color=\"" + themeColor + "\">" + category + "</font>");
     }
 
-    public static String formatTimeCommentsExpiry(Context context, long postTime, int comments, long expiry) {
+    public static SpannedString formatTimeCommentsExpiry(Context context, long postTime, int comments, long expiry) {
         Resources resources = context.getResources();
 
         // Time since posted string
@@ -41,20 +42,36 @@ public class Utility {
 
         // If no expiry, use short format
         if (expiry == 0L)
-            return resources.getString(R.string.format_time_comments, postTimeString, commentString);
+            return new SpannedString(resources.getString(R.string.format_time_comments, postTimeString, commentString));
 
         // Else format with Expiry
-        int expiryTenseRes = (System.currentTimeMillis() > expiry) ? R.string.expired : R.string.expires;
-        String expiryString = resources.getString(expiryTenseRes) + getFriendlyTime(context, expiry);
+        String expiryString = formatExpiry(context, expiry);
 
-        return resources.getString(R.string.format_time_comments_expiry,
-                postTimeString, commentString, expiryString);
+        return new SpannedString(Html.fromHtml(resources.getString(R.string.format_time_comments_expiry,
+                postTimeString, commentString, expiryString)));
     }
 
-    private Spanned setStringColour(Context context, String string, int colourResource) {
+    private static String setStringColour(Context context, String string, int colourResource) {
         String stringColour = String.format("#%06X",
                 (0xFFFFFF & ContextCompat.getColor(context, colourResource)));
-        return Html.fromHtml("<font color=\"" + stringColour + "\">" + string + "</font>");
+        return "<font color=\"" + stringColour + "\">" + string + "</font>";
+    }
+
+    private static String formatExpiry(Context context, long expiry) {
+        long currentTime = System.currentTimeMillis();
+        Resources resources = context.getResources();
+
+        String baseFriendlyExpiry = getFriendlyTime(context, expiry);
+        if (currentTime > expiry) {                                   // If expired, red.
+            return setStringColour(context,
+                    resources.getString(R.string.expired) + baseFriendlyExpiry,
+                    R.color.expiryColour);
+        } else if (new LengthOfTime(currentTime, expiry).days == 0) { // If within a day of expiring, orange.
+            return setStringColour(context,
+                    resources.getString(R.string.expires) + baseFriendlyExpiry,
+                    R.color.nearlyExpiredColour);
+        }
+        return resources.getString(R.string.expires) + baseFriendlyExpiry;  // Otherwise no colour.
     }
 
     // Format used for storing dates in the database.  Also used for converting those strings

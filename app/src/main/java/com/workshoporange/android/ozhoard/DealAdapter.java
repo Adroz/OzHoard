@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spanned;
+import android.text.SpannedString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +65,7 @@ public class DealAdapter extends LoadingScrollRecyclerViewCursorAdapter<DealAdap
         holder.titleView.setText(cursor.getString(DealListActivity.COL_DEAL_TITLE));
 
         // Time since posted, # comments, time until expired
-        String timeCommentsExpiry = Utility.formatTimeCommentsExpiry(
+        SpannedString timeCommentsExpiry = Utility.formatTimeCommentsExpiry(
                 mContext,
                 cursor.getLong(DealListActivity.COL_DEAL_DATE),
                 cursor.getInt(DealListActivity.COL_DEAL_COMMENTS),
